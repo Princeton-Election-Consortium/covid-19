@@ -30,12 +30,11 @@ def generate_plot(filename):
 
     # axes labels
     xtl = [pd.to_datetime(s).strftime('%-m/%d') for s in xdata]
+    ax.set_xticks(np.arange(len(xdata)))
     ax.set_xticklabels(xtl)
 
     # convert to html
     html = mpld3.fig_to_html(fig)
-    
-    #mpld3.show() # TEMPORARY
-    #pl.close(fig)
+    pl.close(fig)
 
     return html

@@ -25,3 +25,5 @@ fold_change.to_csv(foldchange_filename)
 
 # Step 3: generate plot
 html = generate_plot(foldchange_filename)
+with open('test_webpage.html', 'w') as f:
+    f.write('<html><body>\n{}\n</body></html>'.format(html))
