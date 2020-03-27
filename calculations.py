@@ -1,20 +1,15 @@
+import numpy as np
+import pandas as pd
 
-    # calculating days to double the total cases
-    days_to_double = [0] * time_delta.days 
-    for i, total in enumerate(totals):
-        j = i - 1
-        days_to_double[i] = 0
-        while j > 0:
-            if totals[j] <= 0.5 * totals[i]:
-                days_to_double[i] = i - j
-                break
-            j -= 1
+def compute_fold_change(filename, n_days=3):
 
-    # calculating percentage change in over three days
-    percent_change = [0] * time_delta.days 
-    for i, total in enumerate(totals):
-        if i >= 3:
-            percent_change[i] = total / totals[i-3]
-        else:
-            percent_change[i] = 0
+    # load data
+    data = pd.read_csv(filename, index_col=0)
 
+    # sanity checks
+    # TODO
+
+    # fold change over N days
+    fold_change = data[n_days:] / data[:-n_days].values
+
+    return fold_change
