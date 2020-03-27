@@ -2,102 +2,81 @@
 #
 # Author: Lucas Manning
 
-import sys, datetime, os
-import requests
+import sys, datetime
+import numpy as np
+import pandas as pd
 import csv
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 
+ALL_STATES = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois", "Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]
 
-def main():
-    to_track = "Deaths"
-    region = "New Jersey"
-    #
-    # uncomment this line if you want to track US instead of a specific state
-    # type_to_track = ("Country_Region", "Country/Region")
-    #
-    type_to_track = ("Province_State", "Province/State")
+def scrape_regional_data(region="new jersey", 
+                         region_type="state",
+                         var_to_track="Deaths",
+                         start_date=datetime.date(2020, 3, 10),
+                         data_src_template="COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/{datestr}.csv"):
 
-    start_date = datetime.date(2020, 3, 10)
+    """Scrape data for a given region and store in local csv file
+    
+    Parameters
+    ----------
+    region : name of region, e.g. "new jersey"
+    region_type : "state" or "country"
+    var_to_track : e.g. "Deaths"
+    start_date : datetime date object, e.g. datetime.date(2020, 1, 1)
+
+    Returns
+    -------
+    regional_data : pd Series with index of dates and values of var_to_track
+    """
+
+    region_type_dict = {"state": "Province_State",
+                        "country": "Country_Region"}
+
+    column_rename = {'Province/State': 'Province_State',
+                     'Country/Region': 'Country_Region'}
+
+    region = region.lower()
+    region_type = region_type.lower()
+    region_type = region_type_dict[region_type]
+
     end_date = datetime.date.today()
     time_delta = end_date - start_date
+    n_days = time_delta.days
 
-    # grabbing and calculating totals for given region    
-    totals = [0] * time_delta.days
-    for days_since_start in range(time_delta.days):
-        date = start_date + datetime.timedelta(days=days_since_start)
-        
-        with open( f"COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/{date.strftime('%m-%d-%Y')}.csv", "r",  encoding='utf-8-sig') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                if date > datetime.date(2020, 3, 21):
-                    if row[type_to_track[0]] == region:
-                        totals[days_since_start] += int(row[to_track]) if row[to_track] != "" else 0
-                else:
-                    if row[type_to_track[1]] == region:
-                        totals[days_since_start] += int(row[to_track]) if row[to_track] != "" else 0
+    # grab and calculate totals for given region    
+    dates = np.zeros(n_days, dtype='datetime64[s]')
+    totals = np.zeros(n_days)
 
-    # calculating days to double the total cases
-    days_to_double = [0] * time_delta.days 
-    for i, total in enumerate(totals):
-        j = i - 1
-        days_to_double[i] = 0
-        while j > 0:
-            if totals[j] <= 0.5 * totals[i]:
-                days_to_double[i] = i - j
-                break
-            j -= 1
+    for day in range(n_days):
+        # specify day of interest and relevant data file
+        date = start_date + datetime.timedelta(days=day)
+        datestr = date.strftime('%m-%d-%Y')
+        data_src = data_src_template.format(datestr=datestr)
 
-    # calculating percentage change in over three days
-    percent_change = [0] * time_delta.days 
-    for i, total in enumerate(totals):
-        if i >= 3:
-            percent_change[i] = total / totals[i-3]
-        else:
-            percent_change[i] = 0
+        # open data file
+        data = pd.read_csv(data_src)
 
+        # clean up
+        data.rename(column_rename, axis=1, inplace=True)
 
-    # generating graphics
-    # NOTE: Ben you can probably just tear this stuff out and write your own from here forward. 
-    # just really basic matplotlib stuff here
+        # collect only rows from region of interest
+        is_region = data[region_type].str.lower() == region
+        rows = data[is_region]
 
-    x_values = [start_date + datetime.timedelta(days=days_since_start) for days_since_start in range(time_delta.days)]
-    fig, ax1 = plt.subplots()
-    plt.title(f"{to_track} Time to Double {region}")
+        # collect values of relevant variable (e.g. deaths)
+        values = rows[var_to_track].values
+        total = np.nansum(values)
 
-    # this stuff is all related to sam wanting to "floor doubling rate at 3"
-    # I think he wants to remove this now
-    days_to_double = [x if x > 3 else 3 for x in days_to_double]
-    ticks = list(range( 3, 23, 2 ))
-    ticks[0] = "<=3"
-    # ==================
+        # store values
+        dates[day] = np.datetime64(date)
+        totals[day] = total
 
-    ax1.set_ylabel("Doubling time (days)"); 
-    ax1.set_yticks(range(3, 23, 2))
-    ax1.set_yticklabels(ticks)
-    ax1.set_ylim([0,10])
-    color = 'tab:red'
-    ax1.tick_params(axis='y', labelcolor=color)
-    ax1.grid(axis='y')
+    result = pd.Series(totals, index=dates)
+    return result
 
-    ax1.plot(x_values, days_to_double, color=color)
-
-    color = 'tab:blue'
-    ax2 = ax1.twinx()
-    ax2.set_ylabel(to_track); 
-    ax2.set_yticks([2**x for x in range(15)])
-    ax2.tick_params(axis='y', labelcolor=color)
-    ax2.plot(x_values, percent_change, color=color)
-
-    ax2.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d"))
-
-    fig.tight_layout()
-    fig.autofmt_xdate()
-
-    plt.savefig(f"{region + to_track}.png")
-
-    return 0
-        
-
-if __name__ == "__main__":
-    exit(main())
+def scrape_all_regions():
+    """Run scrape_regional_data on all states and return merged DataFrame
+    """
+    series = {state:scrape_regional_data(state) for state in ALL_STATES}
+    data = pd.DataFrame(series)
+    return data
