@@ -3,4 +3,4 @@
 cd COVID-19
 git pull origin master
 cd ..
-python3 scrape.py
+python3 main.py

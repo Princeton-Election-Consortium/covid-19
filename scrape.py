@@ -21,7 +21,7 @@ def scrape_regional_data(region="new jersey",
     ----------
     region : name of region, e.g. "new jersey"
     region_type : "state" or "country"
-    var_to_track : e.g. "Deaths"
+    var_to_track : e.g. "Deaths" / "Confirmed" / "Recovered"
     start_date : datetime date object, e.g. datetime.date(2020, 1, 1)
 
     Returns
@@ -74,9 +74,9 @@ def scrape_regional_data(region="new jersey",
     result = pd.Series(totals, index=dates)
     return result
 
-def scrape_all_regions():
+def scrape_all_regions(**kw):
     """Run scrape_regional_data on all states and return merged DataFrame
     """
-    series = {state:scrape_regional_data(state) for state in ALL_STATES}
+    series = {state:scrape_regional_data(state, **kw) for state in ALL_STATES}
     data = pd.DataFrame(series)
     return data
