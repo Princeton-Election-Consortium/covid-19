@@ -18,17 +18,19 @@ tkfs = 15 # tick font size
 title_pos = (0.05, 0.94)
 ylab_pos = (-0.2, 0.5)
 
-ylims = (0.9, None)
+ylims = (0.0, None)
+n_yticks = 8
 
 cmap = pl.cm.cubehelix
 
 data_line_kw = dict(
                     linewidth = 4,
+                    color = 'darkslateblue',
                     )
 
-ref_line_kw = dict(color = 'grey',
-                   linewidth = 1,
-                   linestyle = ':',
+ref_line_kw = dict(color = 'black',
+                   linewidth = 1.5,
+                   dashes = [4, 2],
                   )
 
 def choose_y(pos, priors, min_dist=0.25, inc=0.01):
@@ -47,7 +49,13 @@ def choose_y(pos, priors, min_dist=0.25, inc=0.01):
 
     return pos
 
-def generate_foldchange_plot(filename, columns, title=''):
+def generate_plot(filename, columns, title='', ylabel=''):
+
+    # process params
+    if not isinstance(columns, list):
+        columns = [columns]
+    if not title and len(columns) == 1:
+        title = columns[0]
 
     # load data
     data = pd.read_csv(filename, index_col=0)
@@ -61,16 +69,26 @@ def generate_foldchange_plot(filename, columns, title=''):
     colors = cmap(np.linspace(0.05, 0.76, len(columns)))
     prior_ys = []
     for column, color in zip(columns, colors):
+        # specify data
         ydata = data[column].values
+        ydata[np.isinf(ydata)] = np.nan
         xdata = np.arange(len(ydata))
-        ax.plot(xdata, ydata, color=color, **data_line_kw)
+
+        # aesthetic prep
+        if len(columns) > 1:
+            data_line_lw['color'] = color
+
+        # plot line
+        ax.plot(xdata, ydata, **data_line_kw)
 
         # label
-        ypos = choose_y(ydata[-1], prior_ys)
-        prior_ys.append(ypos)
-        ax.text(xdata[-1] + 0.1, ypos, column, ha='left', va='center', color=color, fontsize=lfs)
+        if len(columns) > 1:
+            ypos = choose_y(ydata[-1], prior_ys)
+            prior_ys.append(ypos)
+            ax.text(xdata[-1] + 0.1, ypos, column, ha='left', va='center', color=color, fontsize=lfs)
 
     # plot reference data
+    ax.axhline(3, zorder=101, **ref_line_kw)
 
     # axes/spines aesthetics
     ax.set_ylim(ylims)
@@ -79,16 +97,30 @@ def generate_foldchange_plot(filename, columns, title=''):
     ax.spines['left'].set_visible(True)
     ax.spines['bottom'].set_visible(True)
 
-    # ticks
+    # xticks
     xtl = [pd.to_datetime(s).strftime('%-m/%d') for s in data.index.values]
     ax.set_xticks(np.arange(len(xdata)))
     ax.set_xticklabels(xtl)
     ax.tick_params(pad=11, length=10, labelsize=tkfs)
 
+    # yticks
+    yticks = ax.get_yticks()
+    maxx = np.ceil(np.max(yticks))
+    minn = 1 #np.floor(np.min(yticks))
+    int_range = np.arange(minn, maxx + 1).astype(int)
+    if len(int_range) > n_yticks:
+        step = int(np.round(len(int_range) / n_yticks))
+    else:
+        step = 1
+    ax.set_yticks(int_range[::step])
+
     # labels
     ax.text(title_pos[0], title_pos[1], title, fontsize=tfs, weight='bold',
             ha='left', va='center', transform=ax.transAxes)
-    ax.text(ylab_pos[0], ylab_pos[1], 'Fold change in\ndeaths compared\nwith 3 days prior', fontsize=lfs, ha='center', va='center', transform=ax.transAxes)
+    ax.text(ylab_pos[0], ylab_pos[1], ylabel, fontsize=lfs, ha='center', va='center', transform=ax.transAxes)
+
+    # shading boxes
+    ax.axhspan(0, 3, color='white', alpha=0.5, lw=0, zorder=100)
 
     # convert to image, html
     canvas.draw()
