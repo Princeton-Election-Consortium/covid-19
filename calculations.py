@@ -2,9 +2,17 @@ import numpy as np
 import pandas as pd
 
 calculation_descriptions = {
-        'fold_change': 'Fold change in deaths compared with N days prior',
-        'doubling_time': 'Doubling time\nof deaths\n(days)'
+        'fold_change': 'Fold change in {var} compared with N days prior',
+        'doubling_time': 'Doubling time\nof {var}\n(days)'
         }
+
+var_replacements = {
+        'confirmed': 'confirmed cases'
+        }
+
+def c_str(kind, var):
+    var = var_replacements.get(var.lower(), var.lower())
+    return calculation_descriptions[kind].format(var=var)
 
 def calculate(kind, *args, **kwargs):
     if kind == 'fold_change':

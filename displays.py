@@ -100,7 +100,7 @@ def generate_plot(filename, columns, title='', ylabel=''):
     # xticks
     xtl = [pd.to_datetime(s).strftime('%-m/%d') for s in data.index.values]
     ax.set_xticks(np.arange(len(xdata)))
-    ax.set_xticklabels(xtl)
+    ax.set_xticklabels(xtl, rotation=90)
     ax.tick_params(pad=11, length=10, labelsize=tkfs)
 
     # yticks

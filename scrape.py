@@ -8,11 +8,12 @@ import pandas as pd
 import csv
 
 ALL_STATES = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois", "Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]
+ALL_COUNTRIES = ['Canada', 'US', 'China', 'Italy', 'Spain']
 
 def scrape_regional_data(region="new jersey", 
                          region_type="state",
                          var_to_track="Deaths",
-                         start_date=datetime.date(2020, 3, 10),
+                         start_date=datetime.date(2020, 3, 1),
                          data_src_template="COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/{datestr}.csv"):
 
     """Scrape data for a given region and store in local csv file
@@ -34,6 +35,8 @@ def scrape_regional_data(region="new jersey",
 
     column_rename = {'Province/State': 'Province_State',
                      'Country/Region': 'Country_Region'}
+
+    value_relabel = {'Mainland China': 'China'}
 
     region = region.lower()
     region_type = region_type.lower()
@@ -58,6 +61,7 @@ def scrape_regional_data(region="new jersey",
 
         # clean up
         data.rename(column_rename, axis=1, inplace=True)
+        data.replace(value_relabel, inplace=True)
 
         # collect only rows from region of interest
         is_region = data[region_type].str.lower() == region
@@ -77,6 +81,10 @@ def scrape_regional_data(region="new jersey",
 def scrape_all_regions(**kw):
     """Run scrape_regional_data on all states and return merged DataFrame
     """
-    series = {state:scrape_regional_data(state, **kw) for state in ALL_STATES}
-    data = pd.DataFrame(series)
-    return data
+    series_states = {state:scrape_regional_data(state, **kw) for state in ALL_STATES}
+    data_states = pd.DataFrame(series_states)
+
+    series_countries = {cou:scrape_regional_data(cou, region_type='country', **kw) for cou in ALL_COUNTRIES}
+    data_countries = pd.DataFrame(series_countries)
+
+    return pd.concat([data_states, data_countries], axis=1)
