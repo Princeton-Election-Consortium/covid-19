@@ -6,7 +6,7 @@ from imageio import imwrite
 import pandas as pd
 import numpy as np
 import datetime
-import mpld3
+#import mpld3 # removing this dependency because usage is suspended
     
 # Aesthetic parameters
 fig_size = (17, 10)
