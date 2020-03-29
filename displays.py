@@ -1,6 +1,7 @@
 import matplotlib.pyplot as pl
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.transforms import blended_transform_factory as blend
+import seaborn as sns
 from imageio import imwrite
 import pandas as pd
 import numpy as np
@@ -8,20 +9,22 @@ import datetime
 import mpld3
     
 # Aesthetic parameters
-fig_size = (16, 9)
-ax_box = [0.25, 0.1, 0.65, 0.8]
+fig_size = (17, 10)
+ax_box = [0.24, 0.15, 0.63, 0.8]
 
 tfs = 25 # title font size
-lfs = 20 # label font size
-tkfs = 15 # tick font size
+lfs = 25 # series label font size
+ylfs = 30 # ylabel font size
+xtkfs = 25 # xtick font size
+ytkfs = 30 # ytick font size
 
 title_pos = (0.05, 0.94)
-ylab_pos = (-0.2, 0.5)
+ylab_pos = (-0.24, 0.5)
 
 ylims = (0.0, None)
 n_yticks = 8
 
-cmap = pl.cm.cubehelix
+sns_cols = [(0, 0, 0)] + sns.color_palette('deep')
 
 data_linewidth = 4
 data_line_kw = dict(
@@ -49,8 +52,16 @@ def choose_y(pos, priors, min_dist=0.3, inc=0.01):
 
     return pos
 
-def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[]):
+def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], min_date=None):
     """Returns numpy array with image of full figure
+
+    filename : relative path to csv with values to plot
+    columns : str of list thereof of column names to plots
+    title : optional string at title on plot
+    ylabel : optional string as ylabel on plot
+    log : use log scale on y axis
+    bolds : list of indices parallel to `columns` whose label to bold
+    min_date : minimum date to plot
     """
 
     # process params
@@ -61,6 +72,8 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[]):
 
     # load data
     data = pd.read_csv(filename, index_col=0)
+    if min_date is not None:
+        data = data[pd.to_datetime(data.index) >= min_date]
 
     # setup axes
     fig = pl.figure(figsize=fig_size)
@@ -68,7 +81,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[]):
     ax = fig.add_axes(ax_box) 
 
     # plot data
-    colors = cmap(np.linspace(0.05, 0.76, len(columns)))
+    colors = sns_cols[:len(columns)]
     for col_idx, (column, color) in enumerate(zip(columns, colors)):
         # specify data
         ydata = data[column].values
@@ -106,13 +119,15 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[]):
     xtl = [pd.to_datetime(s).strftime('%-m/%d') for s in data.index.values]
     ax.set_xticks(np.arange(len(xdata)))
     ax.set_xticklabels(xtl, rotation=90)
-    ax.tick_params(pad=9, length=10, labelsize=tkfs)
+    ax.tick_params(pad=7, length=10)
+    ax.tick_params(axis='x', labelsize=xtkfs)
+    ax.tick_params(axis='y', labelsize=ytkfs)
 
     # x limit
     subdata = data[columns].values
     allnan = np.all(np.isnan(subdata), axis=1)
     first_nonnan = np.argwhere(allnan == False)[0][0]
-    ax.set_xlim([first_nonnan - 0.5, None])
+    ax.set_xlim([first_nonnan - 0.5, len(subdata) - 0.75])
 
     # yticks
     yticks = ax.get_yticks()
@@ -128,7 +143,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[]):
 
     # labels for data lines
     prior_ys = []
-    min_dist = 0.04 * np.abs(np.diff(ax.get_ylim()))
+    min_dist = 0.06 * np.abs(np.diff(ax.get_ylim()))
     for col_idx, (column, color) in enumerate(zip(columns, colors)):
         # specify data
         ydata = data[column].values
@@ -136,15 +151,19 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[]):
         xdata = np.arange(len(ydata))
 
         if len(columns) > 1:
-            ypos = choose_y(ydata[-1], prior_ys, min_dist=min_dist)
+            ending_win = 4
+            weighting = np.arange(ending_win) ** 2
+            weighting = weighting / weighting.sum()
+            nominal = np.nansum(ydata[-ending_win:] * weighting)
+            ypos = choose_y(nominal, prior_ys, min_dist=min_dist)
             prior_ys.append(ypos)
             weight = 'bold' if col_idx in bolds else None
-            ax.text(xdata[-1] + 0.15, ypos, column, ha='left', va='center', color=color, fontsize=lfs, weight=weight)
+            ax.text(xdata[-1] + 0.22, ypos, column, ha='left', va='center', color=color, fontsize=lfs, weight=weight)
 
     # labels for axes
     if title:
         ax.text(title_pos[0], title_pos[1], title, fontsize=tfs, weight='bold', ha='left', va='center', transform=ax.transAxes)
-    ax.text(ylab_pos[0], ylab_pos[1], ylabel, fontsize=lfs, ha='center', va='center', transform=ax.transAxes)
+    ax.text(ylab_pos[0], ylab_pos[1], ylabel, fontsize=ylfs, ha='center', va='center', transform=ax.transAxes)
 
     # convert to image, html
     canvas.draw()

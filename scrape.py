@@ -13,7 +13,8 @@ ALL_US_REGIONS = {'Pacific': ['Washington', 'Oregon', 'California'],
                   'Rockies': ['Nevada', 'Idaho', 'Montana', 'Wyoming', 'Utah', 'Colorado'],
                   'Southwest': ['Arizona', 'New Mexico', 'Oklahoma', 'Texas'],
                   'Midwest': ['North Dakota', 'South Dakota', 'Nebraska', 'Kansas', 'Minnesota', 'Iowa', 'Missouri', 'Wisconsin', 'Illinois', 'Indiana', 'Ohio'],
-                  'Southeast': ['Arkansas', 'Louisiana', 'Mississippi', 'Alabama', 'Tennessee', 'Kentucky', 'West Virginia', 'Virginia', 'Delaware', 'Maryland', 'North Carolina', 'South Carolina', 'Georgia'],
+                  'Southeast': ['Arkansas', 'Louisiana', 'Mississippi', 'Alabama', 'Tennessee', 'Kentucky', 'West Virginia', 'Virginia', 'Delaware', 'Maryland', 'North Carolina', 'South Carolina', 'Georgia', 'DC', 'Florida'],
+                  'Northeast': ['Massachusetts', 'Rhode Island', 'Connecticut', 'Vermont', 'New Hampshire', 'Maine', 'Pennsylvania', 'New Jersey', 'New York'],
         }
 
 def scrape_regional_data(region="new jersey", 
@@ -80,6 +81,7 @@ def scrape_regional_data(region="new jersey",
         rows = data[is_region]
         if 'world' in region:
             rows = data
+            #rows = data[data['Country_Region'].str.lower() != 'china']
 
         # collect values of relevant variable (e.g. deaths)
         values = rows[var_to_track].values

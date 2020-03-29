@@ -37,14 +37,14 @@ calculated.to_csv(calculated_filename)
 ylab = c_str(calculation_kind, var_to_track)
 
 # Plot 1
-columns = ['US', 'New York', 'New Jersey', 'Washington', 'Ohio', 'Florida', 'DC']
+columns = ['US', 'New York', 'New Jersey', 'Washington', 'Ohio', 'Florida']
 bolds = [0]
-img_1 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds)
+img_1 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds, min_date=pd.to_datetime('2020-3-6'))
 
 # Plot 2
-columns = ['US', 'Pacific', 'Rockies', 'Southwest', 'Midwest', 'Southeast']
+columns = ['US', 'Midwest', 'Northeast', 'Pacific', 'Rockies', 'Southeast', 'Southwest']
 bolds = [0]
-img_2 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds)
+img_2 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds, min_date=pd.to_datetime('2020-3-6'))
 
 # Plot 3
 columns = ['World', 'Italy', 'South Korea', 'France', 'Iran', 'US', 'UK',] # 'China']
