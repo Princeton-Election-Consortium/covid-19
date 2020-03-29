@@ -109,6 +109,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
         data[col] = sdat
     if min_date is not None:
         data = data[pd.to_datetime(data.index) >= min_date]
+    data[data==0] = np.nan
 
     # setup axes
     fig = pl.figure(figsize=fig_size)
@@ -214,6 +215,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     #arr_img = np.fromstring(s, np.uint8).reshape((height, width, 4))
 
     # save image
+    os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, f'{name}.{fmt}')
     pl.savefig(path)
 

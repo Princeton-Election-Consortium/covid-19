@@ -1,6 +1,10 @@
 #!/bin/bash
 
+# Pull new data
 cd COVID-19
 git pull origin master
 cd ..
-python3 main.py
+
+# Run pipeline
+python3 main.py deaths
+python3 main.py confirmed
