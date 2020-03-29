@@ -8,7 +8,9 @@ from PIL import Image
 import pandas as pd
 import numpy as np
 import datetime
-    
+
+# In general, numeric values can be adjusted here as desired, unless comments specify otherwise
+
 # Aesthetic parameters
 fig_size = (18, 11)
 size_scale = fig_size[0] / 18 # do not adjust; ensures that fonts etc remain reasonable if fig_size is changed
@@ -24,7 +26,6 @@ ytkfs = 30 * size_scale # ytick font size
 # ticks
 tpad = 7 * size_scale
 tlen = 10 * size_scale
-n_yticks = 8
 
 # label positions
 title_pos = (0.05, 0.94)
