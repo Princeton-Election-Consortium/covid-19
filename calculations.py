@@ -3,7 +3,7 @@ import pandas as pd
 
 calculation_descriptions = {
         'fold_change': 'Fold change in {var} compared with N days prior',
-        'doubling_time': 'Doubling time\nof {var}\n(days)'
+        'doubling_time': 'Time for {var}\nto double\n(days)'
         }
 
 var_replacements = {
