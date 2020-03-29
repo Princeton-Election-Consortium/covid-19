@@ -135,8 +135,12 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     minn = 0
     if maxx < 10:
         step = 2
-    else:
+    elif maxx >= 10 and maxx < 45:
         step = 5
+    elif maxx >= 45 and maxx < 100:
+        step = 10
+    else:
+        step = 50
     int_range = np.arange(minn, maxx, step).astype(int)
     if not log:
         ax.set_yticks(int_range)

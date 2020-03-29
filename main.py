@@ -6,7 +6,7 @@ Run one iteration of the workflow:
     - convert plots to web-friendly format
 
 This script will be run once per day(?) using a cron job on the PEC server.
-It is run from using the run.sh bash script which first pulls down new data.
+It is run using the run.sh bash script which first pulls down new data.
 """
 
 import os
