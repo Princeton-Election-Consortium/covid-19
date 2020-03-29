@@ -40,6 +40,7 @@ sns_cols = [(0, 0, 0)] + sns.color_palette('deep')
 data_linewidth = 4 * size_scale
 data_line_color = 'darkslateblue'
 
+
 def choose_y(pos, priors, ax, min_dist=min_dist, inc=0.01):
     """Adjust a y coordinate such that it stays a min distance from list of other coordinates
 
@@ -89,6 +90,8 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     log : use log scale on y axis
     bolds : list of indices parallel to `columns` whose label to bold
     min_date : minimum date to plot
+
+    The parameters for the function are limited to those that will likely be changed on a plot-to-plot basis. The remainder of the parameters for plotting are specified at the top of this `displays` module.
     """
 
     # process params

@@ -17,7 +17,6 @@ def scrape_regional_data(region="new jersey",
                          region_type="state",
                          var_to_track="Deaths",
                          start_date=datetime.date(2020, 1, 25),
-                         out_dir='data',
                          data_src_template="COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/{datestr}.csv"):
 
     """Scrape data for a given region and store in local csv file
@@ -28,7 +27,6 @@ def scrape_regional_data(region="new jersey",
     region_type : "state" or "country"
     var_to_track : e.g. "Deaths" / "Confirmed" / "Recovered"
     start_date : datetime date object, e.g. datetime.date(2020, 1, 1)
-    out_dir : directory in which to save output
     data_src_template : str template for data source files
 
     Returns

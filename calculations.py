@@ -15,6 +15,9 @@ def c_str(kind, var):
     return calculation_descriptions[kind].format(var=var)
 
 def calculate(kind, *args, **kwargs):
+    """Wrapper for all relevant calculations in this module.
+    """
+
     if kind == 'fold_change':
         return compute_fold_change(*args, **kwargs)
     
@@ -22,6 +25,10 @@ def calculate(kind, *args, **kwargs):
         return compute_doubling_time(*args, **kwargs)
 
 def compute_fold_change(filename, n_days=3):
+    """For each column, compute daily fold change relative to n days prior
+
+    filename: path to scraped data table
+    """
 
     # load data
     data = pd.read_csv(filename, index_col=0)
@@ -32,6 +39,10 @@ def compute_fold_change(filename, n_days=3):
     return fold_change
 
 def compute_doubling_time(filename, n_days=3):
+    """For each column, compute daily doubling time estimate, defined as ln(2)/ln(growth rate). Growth rate estimate for any given day is made using change relative to n_days ago.
+
+    filename: path to scraped data table
+    """
 
     # load data
     data = pd.read_csv(filename, index_col=0)
