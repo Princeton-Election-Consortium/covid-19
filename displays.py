@@ -82,7 +82,7 @@ def choose_y(pos, priors, ax, min_dist=min_dist, inc=0.01):
     return pos
 
 def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], min_date=None, name='plot', out_dir='images', fmt='png', runaway_zone=False):
-    """Returns numpy array with image of full figure
+    """Generate plot and return path to saved figure image
 
     filename : relative path to csv with values to plot
     columns : str of list thereof of column names to plots
