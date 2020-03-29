@@ -11,7 +11,7 @@ import datetime
     
 # Aesthetic parameters
 fig_size = (18, 11)
-size_scale = fig_size[0] / 18
+size_scale = fig_size[0] / 18 # do not adjust; ensures that fonts etc remain reasonable if fig_size is changed
 ax_box = [0.25, 0.15, 0.62, 0.8]
 
 # font sizes
