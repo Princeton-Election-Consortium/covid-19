@@ -7,7 +7,7 @@ calculation_descriptions = {
         }
 
 var_replacements = {
-        'confirmed': 'confirmed cases'
+        'confirmed': 'cases'
         }
 
 def c_str(kind, var):

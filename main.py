@@ -44,7 +44,7 @@ min_date = pd.Timestamp.today() - pd.to_timedelta(show_n_days, unit='D')
 min_date_states = max(min_date, pd.to_datetime('2020-3-6'))
 
 # Plot 1
-name_1 = f'{calculation_kind}_{var_to_track}_world'
+name_1 = f'{calculation_kind}_{var_to_track}_US-states'
 columns = ['US', 'New York', 'New Jersey', 'Washington', 'Ohio', 'Florida']
 path_1 = generate_plot(calculated_filename,
                        columns,
@@ -68,7 +68,7 @@ path_2 = generate_plot(calculated_filename,
                        name=name_2)
 
 # Plot 3
-name_3 = f'{calculation_kind}_{var_to_track}_US-states'
+name_3 = f'{calculation_kind}_{var_to_track}_world'
 columns = ['World', 'Italy', 'South Korea', 'France', 'Iran', 'US', 'UK']
 path_3 = generate_plot(calculated_filename,
                        columns,
