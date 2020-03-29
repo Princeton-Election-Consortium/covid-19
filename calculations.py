@@ -51,8 +51,8 @@ def compute_doubling_time(filename, n_days=3):
     change = data.pct_change(n_days)
 
     # doubling time in units of n_days
-    # (if n==1 this is doubling time)
-    # (if n==7, it's how many weeks it takes to double)
+    # (if n==1 this is doubling time in days, i.e. how many days it takes to double)
+    # (if n==7, it's in weeks, i.e. how many weeks it takes to double)
     dtime = np.log(2) / np.log(1 + change)
 
     dtime_days = dtime * n_days
