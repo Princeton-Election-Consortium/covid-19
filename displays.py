@@ -23,8 +23,8 @@ n_yticks = 8
 
 cmap = pl.cm.cubehelix
 
+data_linewidth = 4
 data_line_kw = dict(
-                    linewidth = 4,
                     color = 'darkslateblue',
                     )
 
@@ -49,7 +49,7 @@ def choose_y(pos, priors, min_dist=0.3, inc=0.01):
 
     return pos
 
-def generate_plot(filename, columns, title='', ylabel='', log=False):
+def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[]):
     """Returns numpy array with image of full figure
     """
 
@@ -69,7 +69,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False):
 
     # plot data
     colors = cmap(np.linspace(0.05, 0.76, len(columns)))
-    for column, color in zip(columns, colors):
+    for col_idx, (column, color) in enumerate(zip(columns, colors)):
         # specify data
         ydata = data[column].values
         ydata[np.isinf(ydata)] = np.nan
@@ -78,13 +78,17 @@ def generate_plot(filename, columns, title='', ylabel='', log=False):
         # aesthetic prep
         if len(columns) > 1:
             data_line_kw['color'] = color
+        lw = data_linewidth
+        if col_idx in bolds:
+            lw *= 2
 
         # plot line
-        ax.plot(xdata, ydata, **data_line_kw)
+        ax.plot(xdata, ydata, lw=lw, **data_line_kw)
 
     # plot reference data
     #ax.axhline(3, zorder=101, **ref_line_kw)
-    pct90 = np.nanpercentile(data[columns].values, 90) # global 90th percentile values
+    #pct90 = np.nanpercentile(data[columns].values, 90) # global 90th percentile values
+    pct90 = 3
     ax.axhspan(0, pct90, color='lightgrey', alpha=0.35, lw=0)
 
     # axes/spines aesthetics
@@ -102,7 +106,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False):
     xtl = [pd.to_datetime(s).strftime('%-m/%d') for s in data.index.values]
     ax.set_xticks(np.arange(len(xdata)))
     ax.set_xticklabels(xtl, rotation=90)
-    ax.tick_params(pad=11, length=10, labelsize=tkfs)
+    ax.tick_params(pad=9, length=10, labelsize=tkfs)
 
     # x limit
     subdata = data[columns].values
@@ -124,8 +128,8 @@ def generate_plot(filename, columns, title='', ylabel='', log=False):
 
     # labels for data lines
     prior_ys = []
-    min_dist = 0.05 * np.abs(np.diff(ax.get_ylim()))
-    for column, color in zip(columns, colors):
+    min_dist = 0.04 * np.abs(np.diff(ax.get_ylim()))
+    for col_idx, (column, color) in enumerate(zip(columns, colors)):
         # specify data
         ydata = data[column].values
         ydata[np.isinf(ydata)] = np.nan
@@ -134,7 +138,8 @@ def generate_plot(filename, columns, title='', ylabel='', log=False):
         if len(columns) > 1:
             ypos = choose_y(ydata[-1], prior_ys, min_dist=min_dist)
             prior_ys.append(ypos)
-            ax.text(xdata[-1] + 0.1, ypos, column, ha='left', va='center', color=color, fontsize=lfs)
+            weight = 'bold' if col_idx in bolds else None
+            ax.text(xdata[-1] + 0.15, ypos, column, ha='left', va='center', color=color, fontsize=lfs, weight=weight)
 
     # labels for axes
     if title:

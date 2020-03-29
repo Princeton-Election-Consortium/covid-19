@@ -37,14 +37,19 @@ calculated.to_csv(calculated_filename)
 ylab = c_str(calculation_kind, var_to_track)
 
 # Plot 1
-columns = ['US', 'New York', 'New Jersey', 'Washington', 'Ohio', 'Florida', 'District of Columbia']
+columns = ['US', 'New York', 'New Jersey', 'Washington', 'Ohio', 'Florida', 'DC']
 bolds = [0]
-img_c = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds)
+img_1 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds)
+
+# Plot 2
+columns = ['US', 'Pacific', 'Rockies', 'Southwest', 'Midwest', 'Southeast']
+bolds = [0]
+img_2 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds)
 
 # Plot 3
-columns = ['World', 'China', 'Italy', 'South Korea', 'France', 'Iran', 'US', 'United Kingdom']
+columns = ['World', 'Italy', 'South Korea', 'France', 'Iran', 'US', 'UK',] # 'China']
 bolds = [0]
-img_c = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds)
+img_3 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds)
 
 ## Step 4: generate html
-create_html([img_c,])
+create_html([img_1, img_2, img_3])
