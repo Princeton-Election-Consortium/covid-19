@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 calculation_descriptions = {
-        'fold_change': 'Fold change in {var} compared with N days prior',
+        'fold_change': 'Fold change in\n{var} compared\nwith 3 days prior',
         'doubling_time': 'Time for {var}\nto double\n(days)'
         }
 
@@ -27,7 +27,7 @@ def compute_fold_change(filename, n_days=3):
     data = pd.read_csv(filename, index_col=0)
 
     # fold change over N days
-    fold_change = data.pct_change(n_days) + 1 # +1 for pct change vs fold
+    fold_change = data.pct_change(n_days) + 1 # +1 for pct change to fold
 
     return fold_change
 

@@ -45,6 +45,8 @@ def scrape_regional_data(region="new jersey",
 
     value_relabel = {'Mainland China': 'China',
                      'Korea, South': 'South Korea',
+                     'Republic of Korea': 'South Korea',
+                     'Iran (Islamic Republic of)': 'Iran',
                      'District of Columbia': 'DC',
                      'United Kingdom': 'UK'}
 

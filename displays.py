@@ -10,7 +10,7 @@ import numpy as np
 import datetime
     
 # Aesthetic parameters
-fig_size = (9, 5.5)
+fig_size = (18, 11)
 size_scale = fig_size[0] / 18
 ax_box = [0.25, 0.15, 0.62, 0.8]
 
@@ -29,7 +29,8 @@ n_yticks = 8
 # label positions
 title_pos = (0.05, 0.94)
 ylab_pos = (-0.24, 0.5)
-min_dist_factor = 0.06
+min_dist = 0.05
+data_label_x = 0.4
 
 # axes limits
 ylims = (0.0, None)
@@ -39,25 +40,46 @@ sns_cols = [(0, 0, 0)] + sns.color_palette('deep')
 data_linewidth = 4 * size_scale
 data_line_color = 'darkslateblue'
 
-def choose_y(pos, priors, min_dist=0.3, inc=0.01):
+def choose_y(pos, priors, ax, min_dist=min_dist, inc=0.01):
     """Adjust a y coordinate such that it stays a min distance from list of other coordinates
-    """
-    priors = np.array(priors)
 
+    min_dist in axes coordinates
+    pos and priors in data coordinates
+    """
+    
+    # setup transform functions
+    axes_to_data = (ax.transAxes + ax.transData.inverted())
+    data_to_axes = (axes_to_data.inverted())
+    def dat2ax_delta(delta, y):
+        """Convert a delta on y axis at position y, from data to axes coords.
+        Difference from pos to pos+delta (as opposed to 0+delta) needed only for log scale where position on y axis influences relative scale
+        """
+        p1 = data_to_axes.transform((0, y))[1]
+        p2 = data_to_axes.transform((0, y + delta))[1]
+        return p2 - p1
+
+    def get_dif(pos, priors):
+        """As best ypos is searched for, distances to other labels are computed in axes coords so they can be compared to min_dist also in axes_coords, especially important when log scale because position on scale determines size of delta
+        """
+        dif = pos - priors
+        dif = np.array([dat2ax_delta(i, pos) for i in dif])
+        return dif
+    
     if len(priors) == 0:
         return pos
-    
-    dif = pos - priors
+    priors = np.array(priors)
+
+    dif = get_dif(pos, priors)
     closest = np.min(np.abs(dif))
     closest_i = np.argmin(np.abs(dif))
     while closest < min_dist:
         inc_ = inc * np.sign(dif[closest_i])
         pos += inc_
-        closest = np.min(np.abs(pos - priors))
-
+        closest = np.min(np.abs(get_dif(pos, priors)))
+    
     return pos
 
-def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], min_date=None, name='plot', out_dir='images', fmt='png'):
+def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], min_date=None, name='plot', out_dir='images', fmt='png', runaway_zone=False):
     """Returns numpy array with image of full figure
 
     filename : relative path to csv with values to plot
@@ -112,12 +134,12 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
         ax.plot(xdata, ydata, lw=lw, color=data_line_color)
 
     # plot reference data
-    ref = 3
-    ax.axhspan(0, ref, color='lightcoral', alpha=0.3, lw=0)
-    ax.text(.17, .04, 'RUNAWAY SPREAD', fontsize=lfs-2, color='red', zorder=150, ha='center', va='center', weight='bold', transform=ax.transAxes, alpha=0.8)
+    if runaway_zone:
+        ref = 3
+        ax.axhspan(0, ref, color='lightcoral', alpha=0.2, lw=0)
+        ax.text(.17, .04, 'RUNAWAY SPREAD', fontsize=lfs-2, color='red', zorder=150, ha='center', va='center', weight='bold', transform=ax.transAxes, alpha=0.8)
 
     # axes/spines aesthetics
-    ax.set_ylim(ylims)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_visible(True)
@@ -126,14 +148,13 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     # y scale
     if log:
         ax.set_yscale('log')
+    if not log:
+        ax.set_ylim(ylims)
 
     # xticks
     xtl = [pd.to_datetime(s).strftime('%-m/%d') for s in data.index.values]
     ax.set_xticks(np.arange(len(xdata)))
     ax.set_xticklabels(xtl, rotation=90)
-    ax.tick_params(pad=tpad, length=tlen)
-    ax.tick_params(axis='x', labelsize=xtkfs)
-    ax.tick_params(axis='y', labelsize=ytkfs)
 
     # x limit
     subdata = data[columns].values
@@ -157,9 +178,13 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     if not log:
         ax.set_yticks(int_range)
 
+    # tick params
+    ax.tick_params(pad=tpad, length=tlen)
+    ax.tick_params(axis='x', labelsize=xtkfs)
+    ax.tick_params(axis='y', labelsize=ytkfs)
+
     # labels for data lines
     prior_ys = []
-    min_dist = min_dist_factor * np.abs(np.diff(ax.get_ylim()))
     for col_idx, (column, color) in enumerate(zip(columns, colors)):
         # specify data
         ydata = data[column].values
@@ -173,10 +198,10 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
             weighting = weighting / weighting.sum()
             nominal = np.nansum(ydata[-ending_win:] * weighting)
             # fix position to ensure no overlap with other data labels
-            ypos = choose_y(nominal, prior_ys, min_dist=min_dist)
+            ypos = choose_y(nominal, prior_ys, ax)
             prior_ys.append(ypos)
             weight = 'bold' if col_idx in bolds else None
-            ax.text(xdata[-1] + 0.22, ypos, column, ha='left', va='center', color=color, fontsize=lfs, weight=weight)
+            ax.text(xdata[-1] + data_label_x, ypos, column, ha='left', va='center', color=color, fontsize=lfs, weight=weight)
 
     # labels for axes
     if title:

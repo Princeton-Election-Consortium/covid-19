@@ -18,9 +18,11 @@ from displays import generate_plot, generate_html
 # Parameters
 var_to_track = 'Deaths'
 calculation_kind = 'doubling_time'
-show_n_days = 26
+show_n_days = 25
 scraped_data_filename = f'data/scraped_data-{var_to_track}.csv'
 calculated_filename = f'data/{calculation_kind}-{var_to_track}.csv'
+runaway_zone = calculation_kind == 'doubling_time'
+log = calculation_kind == 'fold_change'
 
 # Setup
 os.makedirs('data', exist_ok=True)
@@ -48,6 +50,8 @@ path_1 = generate_plot(calculated_filename,
                        columns,
                        ylabel=ylab,
                        bolds=[0],
+                       log=log,
+                       runaway_zone=runaway_zone,
                        min_date=min_date_states,
                        name=name_1)
 
@@ -58,6 +62,8 @@ path_2 = generate_plot(calculated_filename,
                        columns,
                        ylabel=ylab,
                        bolds=[0],
+                       log=log,
+                       runaway_zone=runaway_zone,
                        min_date=min_date_states,
                        name=name_2)
 
@@ -68,6 +74,8 @@ path_3 = generate_plot(calculated_filename,
                        columns,
                        ylabel=ylab,
                        bolds=[0],
+                       log=log,
+                       runaway_zone=runaway_zone,
                        min_date=min_date,
                        name=name_3)
 
