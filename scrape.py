@@ -20,7 +20,7 @@ ALL_US_REGIONS = {'Pacific': ['Washington', 'Oregon', 'California'],
 def scrape_regional_data(region="new jersey", 
                          region_type="state",
                          var_to_track="Deaths",
-                         start_date=datetime.date(2020, 3, 1),
+                         start_date=datetime.date(2020, 1, 25),
                          data_src_template="COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/{datestr}.csv"):
 
     """Scrape data for a given region and store in local csv file

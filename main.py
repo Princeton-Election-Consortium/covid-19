@@ -18,6 +18,7 @@ from displays import generate_plot, create_html
 # Parameters
 var_to_track = 'Deaths'
 calculation_kind = 'doubling_time'
+show_n_days = 26
 scraped_data_filename = f'data/scraped_data-{var_to_track}.csv'
 calculated_filename = f'data/{calculation_kind}-{var_to_track}.csv'
 
@@ -35,21 +36,23 @@ calculated.to_csv(calculated_filename)
 
 ## Step 3: generate plots
 ylab = c_str(calculation_kind, var_to_track)
+min_date = pd.Timestamp.today() - pd.to_timedelta(show_n_days, unit='D')
+min_date_states = max(min_date, pd.to_datetime('2020-3-6'))
 
 # Plot 1
 columns = ['US', 'New York', 'New Jersey', 'Washington', 'Ohio', 'Florida']
 bolds = [0]
-img_1 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds, min_date=pd.to_datetime('2020-3-6'))
+img_1 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds, min_date=min_date_states)
 
 # Plot 2
 columns = ['US', 'Midwest', 'Northeast', 'Pacific', 'Rockies', 'Southeast', 'Southwest']
 bolds = [0]
-img_2 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds, min_date=pd.to_datetime('2020-3-6'))
+img_2 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds, min_date=min_date_states)
 
 # Plot 3
 columns = ['World', 'Italy', 'South Korea', 'France', 'Iran', 'US', 'UK',] # 'China']
 bolds = [0]
-img_3 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds)
+img_3 = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds, min_date=min_date)
 
 ## Step 4: generate html
 create_html([img_1, img_2, img_3])
