@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 import csv
 
-ALL_STATES = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois", "Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]
-ALL_COUNTRIES = ['Canada', 'US', 'China', 'Italy', 'Spain']
+ALL_STATES = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois", "Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","District of Columbia"]
+ALL_COUNTRIES = ['Canada', 'US', 'China', 'Italy', 'Spain', 'South Korea', 'Australia', 'Germany', 'France', 'Japan', 'Iran', 'United Kingdom']
 
 def scrape_regional_data(region="new jersey", 
                          region_type="state",
@@ -36,7 +36,8 @@ def scrape_regional_data(region="new jersey",
     column_rename = {'Province/State': 'Province_State',
                      'Country/Region': 'Country_Region'}
 
-    value_relabel = {'Mainland China': 'China'}
+    value_relabel = {'Mainland China': 'China',
+                     'Korea, South': 'South Korea'}
 
     region = region.lower()
     region_type = region_type.lower()
@@ -44,7 +45,7 @@ def scrape_regional_data(region="new jersey",
 
     end_date = datetime.date.today()
     time_delta = end_date - start_date
-    n_days = time_delta.days
+    n_days = time_delta.days + 1
 
     # grab and calculate totals for given region    
     dates = np.zeros(n_days, dtype='datetime64[s]')

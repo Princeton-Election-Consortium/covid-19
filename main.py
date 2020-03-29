@@ -34,14 +34,17 @@ calculated = calculate(calculation_kind, scraped_data_filename)
 calculated.to_csv(calculated_filename)
 
 ## Step 3: generate plots
-columns = compute_top_n(calculated_filename, 55)
-#columns = ['US', 'China']
-imgs, htmls = [], []
-for column in columns:
-    img, html = generate_plot(calculated_filename, column,
-            ylabel=c_str(calculation_kind, var_to_track))
-    imgs.append(img)
-    htmls.append(html)
+ylab = c_str(calculation_kind, var_to_track)
+
+# Plot 1
+columns = ['US', 'New York', 'New Jersey', 'Washington', 'Ohio', 'Florida', 'District of Columbia']
+bolds = [0]
+img_c = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds)
+
+# Plot 3
+columns = ['World', 'China', 'Italy', 'South Korea', 'France', 'Iran', 'US', 'United Kingdom']
+bolds = [0]
+img_c = generate_plot(calculated_filename, columns, ylabel=ylab, bolds=bolds)
 
 ## Step 4: generate html
-create_html(imgs, htmls)
+create_html([img_c,])
