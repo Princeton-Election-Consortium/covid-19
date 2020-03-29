@@ -1,5 +1,7 @@
 Purpose: dynamically generate COVID-19 plots for PEC website
+
 Python version: 3x
+
 Dependencies: numpy, pandas, matplotlib, seaborn
 
 Overall workflow:
