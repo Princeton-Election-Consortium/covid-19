@@ -11,6 +11,9 @@ ALL_US_REGIONS = {'Pacific': ['Washington', 'Oregon', 'California'],
                   'Midwest': ['North Dakota', 'South Dakota', 'Nebraska', 'Kansas', 'Minnesota', 'Iowa', 'Missouri', 'Wisconsin', 'Illinois', 'Indiana', 'Ohio', 'Michigan'],
                   'Northeast': ['Massachusetts', 'Rhode Island', 'Connecticut', 'Vermont', 'New Hampshire', 'Maine', 'Pennsylvania', 'New Jersey', 'New York'],
                   'Southeast': ['Arkansas', 'Louisiana', 'Mississippi', 'Alabama', 'Tennessee', 'Kentucky', 'North Carolina', 'South Carolina', 'Georgia', 'Florida'] + ['Virginia', 'West Virginia', 'Maryland', 'Delaware', 'DC'], # 2nd list is 'mid-atlantic'
+                  # below are the groups in which southeast is split into southeast- and mid-atlantic
+                  'Southeast-': ['Arkansas', 'Louisiana', 'Mississippi', 'Alabama', 'Tennessee', 'Kentucky', 'North Carolina', 'South Carolina', 'Georgia', 'Florida'],
+                  'Mid-Atlantic': ['Virginia', 'West Virginia', 'Maryland', 'Delaware', 'DC'], 
         }
 
 def scrape_regional_data(region="new jersey", 

@@ -77,6 +77,19 @@ path_2 = generate_plot(calculated_filename,
                        min_date=min_date_states,
                        name=name_2)
 
+# Plot 2a
+name_2a = f'{calculation_kind}_{var_to_track}_US-regions-alternate'
+columns = ['US', 'Midwest', 'Northeast', 'Rockies', 'Southeast-', 'Mid-Atlantic', 'Southwest', 'Pacific']
+path_2a = generate_plot(calculated_filename,
+                       columns,
+                       ylabel=ylab,
+                       bolds=[0],
+                       log=log,
+                       runaway_zone=runaway_zone,
+                       min_date=min_date_states,
+                       name=name_2a)
+
+
 # Plot 3
 name_3 = f'{calculation_kind}_{var_to_track}_world'
 columns = ['World', 'Italy', 'South Korea', 'France', 'Iran', 'US', 'UK']
