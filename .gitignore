@@ -1,7 +1,6 @@
 images/
 .DS_Store
 *.html
-*.csv
 *.swp
 *.swo
 __pycache__

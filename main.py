@@ -21,9 +21,10 @@ if 'Deaths' in args or 'death' in args:
     var_to_track = 'Deaths'
 elif 'Confirmed' in args or 'confirmed' in args:
     var_to_track = 'Confirmed'
+else:
+    var_to_track = 'Deaths'
 
 # Default parameters
-var_to_track = 'Deaths' # Deaths / Confirmed
 calculation_kind = 'doubling_time' # doubling_time / fold_change
 show_n_days = 25
 scraped_data_filename = f'data/scraped_data-{var_to_track}.csv'
