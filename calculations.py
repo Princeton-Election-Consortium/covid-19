@@ -36,9 +36,6 @@ def compute_fold_change(filename, n_days=3):
     # fold change over N days
     fold_change = data.pct_change(n_days) + 1 # +1 for pct change to fold
 
-    if reverse:
-        fold_change.iloc[::-1]
-
     return fold_change
 
 def compute_doubling_time(filename, n_days=3):

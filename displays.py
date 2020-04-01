@@ -92,7 +92,7 @@ def choose_y(pos, priors, ax, min_dist=min_dist, inc=0.01):
     
     return pos
 
-def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], min_date=None, name='plot', out_dir='images', fmt='png', runaway_zone=False):
+def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], min_date=None, name='plot', out_dir='images', fmt='png', runaway_zone=False, simplified=False):
     """Generate plot and return path to saved figure image
 
     filename : relative path to csv with values to plot
@@ -129,7 +129,12 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     # setup axes
     fig = pl.figure(figsize=fig_size)
     canvas = FigureCanvas(fig)
-    ax = fig.add_axes(ax_box) 
+
+    ax = None
+    if simplified:
+        ax = fig.add_axes([0.05, 0.15, 0.75, 0.8])
+    else:
+        ax = fig.add_axes(ax_box) 
 
     # plot data
     colors = sns_cols[:len(columns)]
@@ -142,6 +147,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
         xdata = np.arange(len(ydata))
 
         # aesthetic prep
+        data_line_color = "black"
         if len(columns) > 1:
             data_line_color = color
         lw = data_linewidth
@@ -155,7 +161,10 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     if runaway_zone:
         ref = 3
         ax.axhspan(0, ref, color='lightcoral', alpha=0.2, lw=0)
-        ax.text(.17, .04, 'RUNAWAY SPREAD', fontsize=lfs-2, color='red', zorder=150, ha='center', va='center', weight='bold', transform=ax.transAxes, alpha=0.8)
+        if simplified:
+            ax.text(.2, .04, 'RUNAWAY SPREAD', fontsize=(lfs-2)*1.5, color='red', zorder=150, ha='center', va='center', weight='bold', transform=ax.transAxes, alpha=0.8)
+        else:
+            ax.text(.17, .04, 'RUNAWAY SPREAD', fontsize=lfs-2, color='red', zorder=150, ha='center', va='center', weight='bold', transform=ax.transAxes, alpha=0.8)
 
     # axes/spines aesthetics
     ax.spines['top'].set_visible(False)
@@ -172,7 +181,10 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     # xticks
     xtl = [pd.to_datetime(s).strftime('%-m/%d') for s in data.index.values]
     ax.set_xticks(np.arange(len(xdata)))
-    ax.set_xticklabels(xtl, rotation=90)
+    if simplified:
+        ax.set_xticklabels(xtl, rotation=70)
+    else:
+        ax.set_xticklabels(xtl, rotation=90)
 
     # x limit
     subdata = data[columns].values
@@ -198,8 +210,12 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
 
     # tick params
     ax.tick_params(pad=tpad, length=tlen)
-    ax.tick_params(axis='x', labelsize=xtkfs)
-    ax.tick_params(axis='y', labelsize=ytkfs)
+    if simplified:
+        ax.tick_params(axis='x', labelsize=xtkfs * 1.5)
+        ax.tick_params(axis='y', labelsize=ytkfs * 1.5)
+    else:
+        ax.tick_params(axis='x', labelsize=xtkfs)
+        ax.tick_params(axis='y', labelsize=ytkfs)
 
     # labels for data lines
     #descending = np.argsort(last_ys[1:])[::-1] + 1
@@ -232,7 +248,10 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
             ypos = choose_y(nominal, prior_ys, ax)
             prior_ys.append(ypos)
             weight = 'bold' if is_bold else None
-            ax.text(xdata[-1] + data_label_x, ypos, column, ha='left', va='center', color=color, fontsize=lfs, weight=weight)
+            if simplified:
+                ax.text(xdata[-1] + data_label_x, ypos, column, ha='left', va='center', color=color, fontsize=lfs * 1.5, weight=weight)
+            else:
+                ax.text(xdata[-1] + data_label_x, ypos, column, ha='left', va='center', color=color, fontsize=lfs, weight=weight)
 
     # labels for axes
     if title:
