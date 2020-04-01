@@ -9,10 +9,8 @@ ALL_US_REGIONS = {'Pacific': ['Washington', 'Oregon', 'California'],
                   'Rockies': ['Nevada', 'Idaho', 'Montana', 'Wyoming', 'Utah', 'Colorado'],
                   'Southwest': ['Arizona', 'New Mexico', 'Oklahoma', 'Texas'],
                   'Midwest': ['North Dakota', 'South Dakota', 'Nebraska', 'Kansas', 'Minnesota', 'Iowa', 'Missouri', 'Wisconsin', 'Illinois', 'Indiana', 'Ohio', 'Michigan'],
-                  'Southeast': ['Arkansas', 'Louisiana', 'Mississippi', 'Alabama', 'Tennessee', 'Kentucky', 'West Virginia', 'Virginia', 'Delaware', 'Maryland', 'North Carolina', 'South Carolina', 'Georgia', 'DC', 'Florida'],
                   'Northeast': ['Massachusetts', 'Rhode Island', 'Connecticut', 'Vermont', 'New Hampshire', 'Maine', 'Pennsylvania', 'New Jersey', 'New York'],
-                  'Deep South': ['Arkansas', 'Louisiana', 'Mississippi', 'Alabama', 'Tennessee', 'Kentucky', 'West Virginia', 'North Carolina', 'South Carolina', 'Georgia', 'DC', 'Florida'],
-                  'East': ['Virginia', 'Maryland', 'Delaware'],
+                  'Southeast': ['Arkansas', 'Louisiana', 'Mississippi', 'Alabama', 'Tennessee', 'Kentucky', 'North Carolina', 'South Carolina', 'Georgia', 'Florida'] + ['Virginia', 'West Virginia', 'Maryland', 'Delaware', 'DC'], # 2nd list is 'mid-atlantic'
         }
 
 def scrape_regional_data(region="new jersey", 

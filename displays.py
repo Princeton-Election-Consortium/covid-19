@@ -30,7 +30,7 @@ tlen = 10 * size_scale
 # label positions
 title_pos = (0.05, 0.94)
 ylab_pos = (-0.24, 0.5)
-min_dist = 0.05
+min_dist = 0.04
 data_label_x = 0.4
 
 # axes limits
@@ -62,6 +62,8 @@ def choose_y(pos, priors, ax, min_dist=min_dist, inc=0.01):
 
     def get_dif(pos, priors):
         """As best ypos is searched for, distances to other labels are computed in axes coords so they can be compared to min_dist also in axes_coords, especially important when log scale because position on scale determines size of delta
+
+        This function accepts all in data coordinates
         """
         dif = pos - priors
         dif = np.array([dat2ax_delta(i, pos) for i in dif])
@@ -70,14 +72,23 @@ def choose_y(pos, priors, ax, min_dist=min_dist, inc=0.01):
     if len(priors) == 0:
         return pos
     priors = np.array(priors)
+    
+    # run through a range of positions and compute the closest label at each one
+    possible = np.arange(0, 1, inc) # span entire axes coordinates
+    mins = []
+    for poss in possible:
+        poss = axes_to_data.transform((0, poss))[1] # convert temporarily to data coordinates
+        closest = np.min(np.abs(get_dif(poss, priors))) # distance of the closest other label if we place at poss
+        mins.append(closest)
+    mins = np.array(mins)
 
-    dif = get_dif(pos, priors)
-    closest = np.min(np.abs(dif))
-    closest_i = np.argmin(np.abs(dif))
-    while closest < min_dist:
-        inc_ = inc * np.sign(dif[closest_i])
-        pos += inc_
-        closest = np.min(np.abs(get_dif(pos, priors)))
+    # find positions where min meets distance criteria, then choose closest one
+    meets_dist_critera = mins > min_dist
+    contenders = possible[meets_dist_critera]
+    # back to data coords to find option that is closest to originally desired value
+    contenders = np.array([axes_to_data.transform((0, i))[1] for i in contenders])
+    best = np.argmin(np.abs(contenders - pos))
+    pos = contenders[best]
     
     return pos
 
@@ -122,9 +133,11 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
 
     # plot data
     colors = sns_cols[:len(columns)]
+    last_ys = []
     for col_idx, (column, color) in enumerate(zip(columns, colors)):
         # specify data
         ydata = data[column].values
+        last_ys.append(ydata[-1]) # for labels later on
         ydata[np.isinf(ydata)] = np.nan
         xdata = np.arange(len(ydata))
 
@@ -189,23 +202,36 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     ax.tick_params(axis='y', labelsize=ytkfs)
 
     # labels for data lines
+    #descending = np.argsort(last_ys[1:])[::-1] + 1
+    #order = np.append(0, descending)
+    order = np.argsort(last_ys)[::-1]
+    is_bold = np.zeros(len(columns))
+    is_bold[bolds] = 1
+    columns_reordered = np.array(columns)[order]
+    colors_reordered = np.array(colors)[order]
+    is_bold_reordered = is_bold[order]
     prior_ys = []
-    for col_idx, (column, color) in enumerate(zip(columns, colors)):
+    for col_idx, (column, color, is_bold) in enumerate(zip(columns_reordered, colors_reordered, is_bold_reordered)):
         # specify data
         ydata = data[column].values
         ydata[np.isinf(ydata)] = np.nan
         xdata = np.arange(len(ydata))
 
         if len(columns) > 1: # only label lines if more than one exists
+
             # nominally place line label at position computed as an exponentially weighted sum of the final N y-values of the data line
-            ending_win = 4
-            weighting = np.arange(ending_win) ** 2
-            weighting = weighting / weighting.sum()
-            nominal = np.nansum(ydata[-ending_win:] * weighting)
+            #ending_win = 4
+            #weighting = np.arange(ending_win) ** 5
+            #weighting = weighting / weighting.sum()
+            #nominal = np.nansum(ydata[-ending_win:] * weighting)
+
+            # or just last data point
+            nominal = ydata[-1]
+
             # fix position to ensure no overlap with other data labels
             ypos = choose_y(nominal, prior_ys, ax)
             prior_ys.append(ypos)
-            weight = 'bold' if col_idx in bolds else None
+            weight = 'bold' if is_bold else None
             ax.text(xdata[-1] + data_label_x, ypos, column, ha='left', va='center', color=color, fontsize=lfs, weight=weight)
 
     # labels for axes
