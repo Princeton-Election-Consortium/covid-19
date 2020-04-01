@@ -132,7 +132,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
 
     ax = None
     if simplified:
-        ax = fig.add_axes([0.05, 0.15, 0.75, 0.8])
+        ax = fig.add_axes([0.05, 0.15, 0.9, 0.8])
     else:
         ax = fig.add_axes(ax_box) 
 

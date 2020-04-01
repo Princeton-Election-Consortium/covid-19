@@ -91,10 +91,10 @@ path_2a = generate_plot(calculated_filename,
 
 # Plot 2b
 name_2 = f'{calculation_kind}_{var_to_track}_US-regions-simple'
-columns = ['US', 'Midwest', 'Northeast', 'Rockies', 'Southeast', 'Southwest', 'Pacific']
+columns = ['US']
 path_2 = generate_plot(calculated_filename,
                        columns,
-                       bolds=[0, 1, 2, 3, 4, 5, 6],
+                       bolds=[0],
                        log=log,
                        runaway_zone=runaway_zone,
                        min_date=min_date_states,
