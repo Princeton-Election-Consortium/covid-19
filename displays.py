@@ -249,7 +249,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
             prior_ys.append(ypos)
             weight = 'bold' if is_bold else None
             if not simplified or column == "US":
-                ax.text(xdata[-1] + data_label_x, ypos, column, ha='left', va='center', color=color, fontsize=lfs if simplified else lfs * 1.5, weight=weight)
+                ax.text(xdata[-1] + data_label_x, ypos, column, ha='left', va='center', color=color, fontsize=lfs * 1.5 if simplified else lfs, weight=weight)
 
     # labels for axes
     if title:
