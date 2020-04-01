@@ -31,6 +31,7 @@ scraped_data_filename = f'data/scraped_data-{var_to_track}.csv'
 calculated_filename = f'data/{calculation_kind}-{var_to_track}.csv'
 runaway_zone = calculation_kind == 'doubling_time'
 log = calculation_kind == 'fold_change'
+output_reverse_csv = True
 
 ## Step 1: scrape and save to file
 data = scrape_all_regions(var_to_track=var_to_track)
@@ -40,6 +41,12 @@ data.to_csv(scraped_data_filename)
 ## Step 2: run calculation
 calculated = calculate(calculation_kind, scraped_data_filename)
 calculated.to_csv(calculated_filename)
+
+if output_reverse_csv:
+    calculated_reversed = calculated.sort_index(axis=0, ascending=False)
+    calculated_reversed_filename = f'data/{calculation_kind}-{var_to_track}-reversed.csv'
+    calculated_reversed.to_csv(calculated_reversed_filename)
+
 
 ## Step 3: generate and save plots
 ylab = c_str(calculation_kind, var_to_track)
