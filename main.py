@@ -15,6 +15,13 @@ from scrape import scrape_all_regions
 from calculations import calculate, compute_top_n, c_str
 from displays import generate_plot, generate_html
 
+# Coarsely parse script arguments
+args = sys.argv
+if 'Deaths' in args or 'death' in args:
+    var_to_track = 'Deaths'
+elif 'Confirmed' in args or 'confirmed' in args:
+    var_to_track = 'Confirmed'
+
 # Default parameters
 var_to_track = 'Deaths' # Deaths / Confirmed
 calculation_kind = 'doubling_time' # doubling_time / fold_change
@@ -23,13 +30,6 @@ scraped_data_filename = f'data/scraped_data-{var_to_track}.csv'
 calculated_filename = f'data/{calculation_kind}-{var_to_track}.csv'
 runaway_zone = calculation_kind == 'doubling_time'
 log = calculation_kind == 'fold_change'
-
-# Coarsely parse script arguments
-args = sys.argv
-if 'Deaths' in args or 'death' in args:
-    var_to_track = 'Deaths'
-elif 'Confirmed' in args or 'confirmed' in args:
-    var_to_track = 'Confirmed'
 
 ## Step 1: scrape and save to file
 data = scrape_all_regions(var_to_track=var_to_track)
