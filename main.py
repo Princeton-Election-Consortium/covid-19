@@ -91,7 +91,7 @@ path_2a = generate_plot(calculated_filename,
 
 # Plot 2b
 name_2 = f'{calculation_kind}_{var_to_track}_US-regions-simple'
-columns = ['US']
+columns = ['US', 'Midwest', 'Northeast', 'Rockies', 'Southeast', 'Southwest', 'Pacific']
 path_2 = generate_plot(calculated_filename,
                        columns,
                        bolds=[0],

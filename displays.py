@@ -248,10 +248,8 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
             ypos = choose_y(nominal, prior_ys, ax)
             prior_ys.append(ypos)
             weight = 'bold' if is_bold else None
-            if simplified:
-                ax.text(xdata[-1] + data_label_x, ypos, column, ha='left', va='center', color=color, fontsize=lfs * 1.5, weight=weight)
-            else:
-                ax.text(xdata[-1] + data_label_x, ypos, column, ha='left', va='center', color=color, fontsize=lfs, weight=weight)
+            if not simplified or column == "US":
+                ax.text(xdata[-1] + data_label_x, ypos, column, ha='left', va='center', color=color, fontsize=lfs if simplified else lfs * 1.5, weight=weight)
 
     # labels for axes
     if title:
@@ -271,7 +269,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     pl.close(fig)
     return path
 
-def generate_html(paths, pixel_width=500):
+def generate_html(paths, pixel_width=200):
     
     img_tags = []
     for path in paths:
