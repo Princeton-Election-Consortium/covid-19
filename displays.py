@@ -176,7 +176,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
         ax.set_ylim(ylims)
 
     # xticks
-    xtl = [pd.to_datetime(s).strftime('%-m/%d') for s in data.index.values]
+    xtl = [pd.to_datetime(s).strftime('%-m/%d') for i, s in enumerate(data.index.values) if i % 3 == 0]
     ax.set_xticks(np.arange(0, len(xdata), 3))
     if simplified:
         ax.set_xticklabels(xtl, rotation=70)
