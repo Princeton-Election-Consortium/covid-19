@@ -64,6 +64,19 @@ path_1 = generate_plot(calculated_filename,
                        runaway_zone=runaway_zone,
                        min_date=min_date_states,
                        name=name_1)
+# Plot 1a
+name_1 = f'{calculation_kind}_{var_to_track}_US-states-simple'
+columns = ['US', 'New York', 'New Jersey', 'Washington', 'Ohio', 'Florida']
+path_1 = generate_plot(calculated_filename,
+                       columns,
+                       ylabel=ylab,
+                       bolds=[0],
+                       log=log,
+                       runaway_zone=runaway_zone,
+                       min_date=min_date_states,
+                       name=name_1,
+                       simplified=True,
+                       simp_fs_mult=1.8)
 
 # Plot 2
 name_2 = f'{calculation_kind}_{var_to_track}_US-regions'
@@ -99,7 +112,8 @@ path_2 = generate_plot(calculated_filename,
                        runaway_zone=runaway_zone,
                        min_date=min_date_states,
                        name=name_2,
-                       simplified=True)
+                       simplified=True,
+                       simp_fs_mult=1.8)
 
 
 # Plot 3
@@ -115,6 +129,22 @@ path_3 = generate_plot(calculated_filename,
                        runaway_zone=runaway_zone,
                        min_date=min_date,
                        name=name_3)
+
+# plot 3a
+name_3 = f'{calculation_kind}_{var_to_track}_world-simple'
+columns = ['World', 'Italy', 'South Korea', 'France', 'Iran', 'US', 'UK']
+if var_to_track == 'Confirmed':
+    columns.remove('South Korea')
+path_3 = generate_plot(calculated_filename,
+                       columns,
+                       ylabel=ylab,
+                       bolds=[0],
+                       log=log,
+                       runaway_zone=runaway_zone,
+                       min_date=min_date,
+                       name=name_3,
+                       simplified=True,
+                       simp_fs_mult=1.3)
 
 ## Step 4: generate html (as example)
 generate_html([path_1, path_2, path_3])
