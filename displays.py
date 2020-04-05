@@ -118,6 +118,9 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     # process data for display purposes
     for col in columns:
         sdat = data[col].values
+        if np.sum(sdat) == 0:
+            columns.remove(col)
+            continue
         isnan = np.isnan(sdat)
         first_nonnan = np.argwhere(isnan == False)[0][0]
         sdat[:first_nonnan + 3] = np.nan

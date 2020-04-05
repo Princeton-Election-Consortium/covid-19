@@ -11,7 +11,7 @@ It is run using the run.sh bash script which first pulls down new data.
 
 import os, sys
 import pandas as pd
-from scrape import scrape_all_regions
+from scrape import scrape_all_regions, ALL_US_REGIONS
 from calculations import calculate, compute_top_n, c_str
 from displays import generate_plot, generate_html
 
@@ -52,6 +52,19 @@ if output_reverse_csv:
 ylab = c_str(calculation_kind, var_to_track)
 min_date = pd.Timestamp.today() - pd.to_timedelta(show_n_days, unit='D')
 min_date_states = max(min_date, pd.to_datetime('2020-3-6'))
+
+for name, states in ALL_US_REGIONS.items():
+    name_1 = f'{calculation_kind}_{var_to_track}_US-{name}'
+    columns = states
+    columns.insert(0, name)
+    path_1 = generate_plot(calculated_filename,
+                        columns,
+                        ylabel=ylab,
+                        bolds=[0],
+                        log=log,
+                        runaway_zone=runaway_zone,
+                        min_date=min_date_states,
+                        name=name_1)
 
 # Plot 1
 name_1 = f'{calculation_kind}_{var_to_track}_US-states'
