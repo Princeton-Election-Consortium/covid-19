@@ -154,7 +154,7 @@
             let data_flipped = Object.keys(states_to_codes).map(state => {
                 let row = {}
                 
-                let total_deaths = deaths_raw_data.map(x => +x[state]).reduce((acc, curr) => acc + curr)
+                let total_deaths = +deaths_raw_data[deaths_raw_data.length - 1][state]
                 row["State"] = state
                 row["Most Recent"] = +most_recent[state] ? +most_recent[state] : 0
                 row["One Week Ago"] = +one_week_ago[state] ? +one_week_ago[state] : 0
