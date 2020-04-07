@@ -156,6 +156,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
         # specify data
         ydata = data[column].values
         last_ys.append(ydata[-1]) # for labels later on
+        ydata = np.clip(ydata, 0, 20)
         ydata[np.isinf(ydata)] = np.nan
         xdata = np.arange(len(ydata))
 

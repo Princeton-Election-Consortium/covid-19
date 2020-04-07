@@ -10,6 +10,7 @@
             border-collapse: collapse;
             border-spacing: 2px;
             border-color: gray;
+            border: 1px solid #eee;
             display: table;
             width: 100%;
             max-width: 640px;
@@ -17,10 +18,11 @@
         }
 
         th {
-            text-align: left;
+            text-align: center;
             vertical-align: inherit;
             font-weight: bold;
             display: table-cell;
+            border: 1px solid #eee;
         }
 
         tr:not(:last-child) {
@@ -39,6 +41,8 @@
         td {
             display: table-cell;
             vertical-align: inherit;
+            border: 1px solid #eee;
+            text-align: center;
         }
     </style>
     <label>Sort by</label>
@@ -169,23 +173,34 @@
                 sorted = data_flipped.sort((a, b) => d3.descending(a[sort_on], b[sort_on])).slice(0, 10)
 
             }
+            let headerrows = [
+                ["", "", "Time to Double (days)"],
+                keys
+            ]
 
             d3.select("#covid-table")
                 .selectAll("table")
-                .data(keys)
+                .data(headerrows)
+                .join("tr")
+                .selectAll("th")
+                .data(d => d)
                 .join("th")
+                .attr("colspan", d => d == headerrows[0][2] ? 2 : 1)
                 .text(d => d)
                 .exit()
+
+            d3.select("#covid-table")
+                .selectAll("table")
                 .data(sorted)
-                .join("tr")
-                .selectAll("td")
-                .data(d => keys.map(key => ({key, value: d[key]})))
-                .join("td")
-                .text(d => {
-                    if (d.key == "State") return states_to_codes[d.value]
-                    if (d.key == "Total Deaths") return d.value
-                    return d.value.toFixed(2)
-                })
+                    .join("tr")
+                    .selectAll("td")
+                    .data(d => keys.map(key => ({key, value: d[key]})))
+                    .join("td")
+                    .text(d => {
+                        if (d.key == "State") return states_to_codes[d.value]
+                        if (d.key == "Total Deaths") return d.value
+                        return d.value.toFixed(2)
+                    })
         }
     </script>
 </div>
