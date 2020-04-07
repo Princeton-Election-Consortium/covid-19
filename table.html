@@ -131,7 +131,7 @@
         get_data().then(build_graph)
 
         async function get_data() {
-            let path = window.location.hostname === "election.princeton.edu" ? "data/covid-19" : "data"
+            let path = window.location.hostname === "election.princeton.edu" ? "/data/covid-19" : "data"
 
             deaths_raw_data = await d3.csv(`${path}/scraped_data-Deaths.csv`, row => { 
                 row["date"] = new Date(row[""])
