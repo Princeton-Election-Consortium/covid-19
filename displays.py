@@ -115,12 +115,22 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     # load data
     data = pd.read_csv(filename, index_col=0)
 
-    # process data for display purposes
+    new_columns = []
     for col in columns:
         sdat = data[col].values
         if np.sum(sdat) == 0:
             columns.remove(col)
             continue
+        isnan = np.isnan(sdat)
+        if len(np.argwhere(isnan == False)) == 0:
+            columns.remove(col)
+            continue
+        new_columns.append(col)
+    columns = new_columns
+
+    # process data for display purposes
+    for col in columns:
+        sdat = data[col].values
         isnan = np.isnan(sdat)
         first_nonnan = np.argwhere(isnan == False)[0][0]
         sdat[:first_nonnan + 3] = np.nan
@@ -237,8 +247,8 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
             #weighting = weighting / weighting.sum()
             #nominal = np.nansum(ydata[-ending_win:] * weighting)
 
-            # or just last data point
-            nominal = ydata[-1]
+            # or just last data point that isnt nan
+            nominal = ydata[np.argwhere(np.isfinite(ydata))[0][-1]]
 
             # fix position to ensure no overlap with other data labels
             ypos = choose_y(nominal, prior_ys, ax)
