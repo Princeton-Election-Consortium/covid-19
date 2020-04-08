@@ -46,10 +46,15 @@
         }
     </style>
     <label>Sort by</label>
-    <select id="covid-table-select"></select>
+    <select id="covid-table-select">
+        <option>State</option>
+        <option selected>Deaths</option>
+        <option>Now</option>
+        <option>Last Week</option>
+    </select>
     <select id="covid-table-select-dir">
-        <option>Ascending</option>
         <option>Descending</option>
+        <option>Ascending</option>
     </select>
     <br>
     <br>
@@ -116,8 +121,8 @@
             'US' : 'US'
         }
 
-        let sort_on = "State"
-        let dir = "Ascending"
+        let sort_on = "Deaths"
+        let dir = "Descending"
 
         document.querySelector("#covid-table-select").addEventListener('change', e => {
             sort_on = e.target.value
@@ -127,12 +132,6 @@
             dir = e.target.value
             build_graph()
         })
-
-        d3.select("#covid-table-select")
-            .selectAll("select")
-            .data(keys)
-            .join("option")
-            .text(d => d)
 
         get_data().then(build_graph)
 
