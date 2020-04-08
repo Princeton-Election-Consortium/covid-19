@@ -1,4 +1,4 @@
-<div id="covid-table-container">
+<div style="width: 200px;"id="covid-table-container">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.1/d3.js"></script>
     <style scoped>
         label {
@@ -55,9 +55,10 @@
     <br>
     <table id="covid-table"></table>
     <script>
-        let keys =  ["State", "Total Deaths", "Most Recent", "One Week Ago"]
+        let keys =  ["State", "Deaths", "Now", "Last Week"]
         let deaths_raw_data;
         let doubling_deaths_raw_data;
+        let data_flipped;
 
         let states_to_codes = {
             'Alabama': 'AL',
@@ -111,7 +112,8 @@
             'West Virginia': 'WV',
             'Wisconsin': 'WI',
             'Wyoming': 'WY',
-            'DC': 'DC'
+            'DC': 'DC',
+            'US' : 'US'
         }
 
         let sort_on = "State"
@@ -148,33 +150,42 @@
                 delete row[""]
                 return row
             })
+
+            let most_recent = doubling_deaths_raw_data[0]
+            let one_week_ago = doubling_deaths_raw_data[7]
+            data_flipped = Object.keys(states_to_codes).map(state => {
+                let row = {}
+                
+                let total_deaths = +deaths_raw_data[deaths_raw_data.length - 1][state]
+                row["State"] = state
+                row["Now"] = +most_recent[state] ? +most_recent[state] : 0
+                row["Last Week"] = +one_week_ago[state] ? +one_week_ago[state] : 0
+                row["Deaths"] = +total_deaths
+                return row
+            }).filter(d => d["Now"] !== 0 && d["Last Week"] !== 0)
         }
 
         function build_graph() {
             d3.select("#covid-table").html("")
 
-            let most_recent = doubling_deaths_raw_data[0]
-            let one_week_ago = doubling_deaths_raw_data[7]
-            let data_flipped = Object.keys(states_to_codes).map(state => {
-                let row = {}
-                
-                let total_deaths = +deaths_raw_data[deaths_raw_data.length - 1][state]
-                row["State"] = state
-                row["Most Recent"] = +most_recent[state] ? +most_recent[state] : 0
-                row["One Week Ago"] = +one_week_ago[state] ? +one_week_ago[state] : 0
-                row["Total Deaths"] = total_deaths
-                return row
-            }).filter(d => d["Most Recent"] !== 0 && d["One Week Ago"] !== 0)
-
-            let sorted
+            let sorted = data_flipped.filter(d => d["State"] !== "US")
             if (dir === "Ascending") {
-                sorted = data_flipped.sort((a, b) => d3.ascending(a[sort_on], b[sort_on])).slice(0, 10)
+                sorted = sorted.sort((a, b) => d3.ascending(a[sort_on], b[sort_on])).slice(0, 10)
             } else {
-                sorted = data_flipped.sort((a, b) => d3.descending(a[sort_on], b[sort_on])).slice(0, 10)
-
+                sorted = sorted.sort((a, b) => d3.descending(a[sort_on], b[sort_on])).slice(0, 10)
             }
+            
+            let row = {
+                "State" : "US",
+                "Now" : +doubling_deaths_raw_data[0]["US"],
+                "Last Week" : +doubling_deaths_raw_data[7]["US"],
+                "Deaths" : +deaths_raw_data[deaths_raw_data.length - 1]["US"]
+            }
+
+            sorted.unshift(row)
+
             let headerrows = [
-                ["", "", "Time to Double (days)"],
+                ["", "", "Doubling Time"],
                 keys
             ]
 
@@ -196,8 +207,11 @@
                     .data(d => keys.map(key => ({key, value: d[key]})))
                     .join("td")
                     .html(d => {
-                        if (d.key == "State") return `<a href="https://www.nytimes.com/interactive/2020/us/${d.value.toLowerCase().replace(" ", "-")}-coronavirus-cases.html">${states_to_codes[d.value]}</a>`
-                        if (d.key == "Total Deaths") return d.value
+                        if (d.key == "State") {
+                            if (d.value == "US") return `<a href="https://www.nytimes.com/interactive/2020/us/coronavirus-us-cases.html">US</a>`
+                            return `<a href="https://www.nytimes.com/interactive/2020/us/${d.value.toLowerCase().replace(" ", "-")}-coronavirus-cases.html">${states_to_codes[d.value]}</a>`
+                        }
+                        if (d.key == "Deaths") return d.value
                         return d.value.toFixed(2)
                     })
         }
