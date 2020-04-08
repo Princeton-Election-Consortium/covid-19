@@ -187,7 +187,6 @@
                 .join("th")
                 .attr("colspan", d => d == headerrows[0][2] ? 2 : 1)
                 .text(d => d)
-                .exit()
 
             d3.select("#covid-table")
                 .selectAll("table")
@@ -196,8 +195,8 @@
                     .selectAll("td")
                     .data(d => keys.map(key => ({key, value: d[key]})))
                     .join("td")
-                    .text(d => {
-                        if (d.key == "State") return states_to_codes[d.value]
+                    .html(d => {
+                        if (d.key == "State") return `<a href="https://www.nytimes.com/interactive/2020/us/${d.value.toLowerCase().replace(" ", "-")}-coronavirus-cases.html">${states_to_codes[d.value]}</a>`
                         if (d.key == "Total Deaths") return d.value
                         return d.value.toFixed(2)
                     })
