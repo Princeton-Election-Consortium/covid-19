@@ -249,7 +249,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
             #nominal = np.nansum(ydata[-ending_win:] * weighting)
 
             # or just last data point that isnt nan
-            nominal = ydata[np.argwhere(np.isfinite(ydata))[0][-1]]
+            nominal = ydata[~np.isnan(ydata)][-1]
 
             # fix position to ensure no overlap with other data labels
             ypos = choose_y(nominal, prior_ys, ax)
