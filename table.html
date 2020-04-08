@@ -212,7 +212,7 @@
                             return `<a href="https://www.nytimes.com/interactive/2020/us/${d.value.toLowerCase().replace(" ", "-")}-coronavirus-cases.html">${states_to_codes[d.value]}</a>`
                         }
                         if (d.key == "Deaths") return d.value
-                        return d.value.toFixed(2)
+                        return `${d.value.toFixed(1)} d`
                     })
         }
     </script>
