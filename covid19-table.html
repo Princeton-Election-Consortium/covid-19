@@ -14,6 +14,7 @@
             width: 100%;
             max-width: 640px;
             font-size: 14px;
+            border: 1px solid #eee;
         }
 
         th {
@@ -172,6 +173,11 @@
             } else {
                 sorted = sorted.sort((a, b) => d3.descending(a[sort_on], b[sort_on]))
             }
+
+            let computed_width = d3.select("#covid-table").node().getBoundingClientRect().width
+            if (computed_width < 300) {
+                sorted = sorted.slice(0, 10)
+            }
             
             let row = {
                 "State" : "US",
@@ -201,6 +207,7 @@
                 .selectAll("table")
                 .data(sorted)
                     .join("tr")
+                        .style("font-weight", (d, i) => i == 0 ? "bold" : "")
                     .selectAll("td")
                     .data(d => keys.map(key => ({key, value: d[key]})))
                     .join("td")
