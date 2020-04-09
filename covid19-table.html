@@ -1,0 +1,217 @@
+<div id="covid-table-container">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.1/d3.js"></script>
+    <style scoped>
+        label {
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+        table{
+            font-family: sans-serif;
+            border-collapse: collapse;
+            border-spacing: 2px;
+            border-color: gray;
+            display: table;
+            width: 100%;
+            max-width: 640px;
+            font-size: 14px;
+        }
+
+        th {
+            text-align: center;
+            vertical-align: inherit;
+            border: 1px solid #eee;
+            font-weight: bold;
+            display: table-cell;
+        }
+
+        tr:not(:last-child) {
+            border-bottom: 1px solid #eee
+        }
+
+        table > tr {
+            vertical-align: middle;
+        }
+
+        tr {
+            display: table-row;
+            border-color: inherit;
+        }
+
+        td {
+            display: table-cell;
+            vertical-align: inherit;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+    </style>
+    <label>Sort by</label>
+    <select id="covid-table-select">
+        <option>State</option>
+        <option selected>Deaths</option>
+        <option>Now</option>
+        <option>Last Week</option>
+    </select>
+    <select id="covid-table-select-dir">
+        <option>Descending</option>
+        <option>Ascending</option>
+    </select>
+    <br>
+    <br>
+    <table id="covid-table"></table>
+    <script>
+        let keys =  ["State", "Deaths", "Now", "Last Week"]
+        let deaths_raw_data;
+        let doubling_deaths_raw_data;
+        let data_flipped;
+
+        let states_to_codes = {
+            'Alabama': 'AL',
+            'Alaska': 'AK',
+            'Arizona': 'AZ',
+            'Arkansas': 'AR',
+            'California': 'CA',
+            'Colorado': 'CO',
+            'Connecticut': 'CT',
+            'Delaware': 'DE',
+            'Florida': 'FL',
+            'Georgia': 'GA',
+            'Hawaii': 'HI',
+            'Idaho': 'ID',
+            'Illinois': 'IL',
+            'Indiana': 'IN',
+            'Iowa': 'IA',
+            'Kansas': 'KS',
+            'Kentucky': 'KY',
+            'Louisiana': 'LA',
+            'Maine': 'ME',
+            'Maryland': 'MD',
+            'Massachusetts': 'MA',
+            'Michigan': 'MI',
+            'Minnesota': 'MN',
+            'Mississippi': 'MS',
+            'Missouri': 'MO',
+            'Montana': 'MT',
+            'Nebraska': 'NE',
+            'Nevada': 'NV',
+            'New Hampshire': 'NH',
+            'New Jersey': 'NJ',
+            'New Mexico': 'NM',
+            'New York': 'NY',
+            'North Carolina': 'NC',
+            'North Dakota': 'ND',
+            'Ohio': 'OH',
+            'Oklahoma': 'OK',
+            'Oregon': 'OR',
+            'Palau': 'PW',
+            'Pennsylvania': 'PA',
+            'Rhode Island': 'RI',
+            'South Carolina': 'SC',
+            'South Dakota': 'SD',
+            'Tennessee': 'TN',
+            'Texas': 'TX',
+            'Utah': 'UT',
+            'Vermont': 'VT',
+            'Virginia': 'VA',
+            'Washington': 'WA',
+            'West Virginia': 'WV',
+            'Wisconsin': 'WI',
+            'Wyoming': 'WY',
+            'DC': 'DC',
+            'US' : 'US'
+        }
+
+        let sort_on = "Deaths"
+        let dir = "Descending"
+
+        document.querySelector("#covid-table-select").addEventListener('change', e => {
+            sort_on = e.target.value
+            build_graph()
+        })
+        document.querySelector("#covid-table-select-dir").addEventListener('change', e => {
+            dir = e.target.value
+            build_graph()
+        })
+
+        get_data().then(build_graph)
+
+        async function get_data() {
+            let path = window.location.hostname === "election.princeton.edu" ? "/data/covid-19" : "data"
+
+            deaths_raw_data = await d3.csv(`${path}/scraped_data-Deaths.csv`, row => { 
+                row["date"] = new Date(row[""])
+                delete row[""]
+                return row
+            })
+
+            doubling_deaths_raw_data = await d3.csv(`${path}/doubling_time-Deaths-reversed.csv`, row => { 
+                row["date"] = new Date(row[""])
+                delete row[""]
+                return row
+            })
+
+            let most_recent = doubling_deaths_raw_data[0]
+            let one_week_ago = doubling_deaths_raw_data[7]
+            data_flipped = Object.keys(states_to_codes).map(state => {
+                let row = {}
+                
+                let total_deaths = +deaths_raw_data[deaths_raw_data.length - 1][state]
+                row["State"] = state
+                row["Now"] = +most_recent[state] ? +most_recent[state] : 0
+                row["Last Week"] = +one_week_ago[state] ? +one_week_ago[state] : 0
+                row["Deaths"] = +total_deaths
+                return row
+            }).filter(d => d["Now"] !== 0 && d["Last Week"] !== 0)
+        }
+
+        function build_graph() {
+            d3.select("#covid-table").html("")
+
+            let sorted = data_flipped.filter(d => d["State"] !== "US")
+            if (dir === "Ascending") {
+                sorted = sorted.sort((a, b) => d3.ascending(a[sort_on], b[sort_on]))
+            } else {
+                sorted = sorted.sort((a, b) => d3.descending(a[sort_on], b[sort_on]))
+            }
+            
+            let row = {
+                "State" : "US",
+                "Now" : +doubling_deaths_raw_data[0]["US"],
+                "Last Week" : +doubling_deaths_raw_data[7]["US"],
+                "Deaths" : +deaths_raw_data[deaths_raw_data.length - 1]["US"]
+            }
+
+            sorted.unshift(row)
+
+            let headerrows = [
+                ["", "", "Doubling Time"],
+                keys
+            ]
+
+            d3.select("#covid-table")
+                .selectAll("table")
+                .data(headerrows)
+                .join("tr")
+                .selectAll("th")
+                .data(d => d)
+                .join("th")
+                .attr("colspan", d => d == headerrows[0][2] ? 2 : 1)
+                .text(d => d)
+
+            d3.select("#covid-table")
+                .selectAll("table")
+                .data(sorted)
+                    .join("tr")
+                    .selectAll("td")
+                    .data(d => keys.map(key => ({key, value: d[key]})))
+                    .join("td")
+                    .html(d => {
+                        if (d.key == "State") {
+                            if (d.value == "US") return `<a href="https://www.nytimes.com/interactive/2020/us/coronavirus-us-cases.html">US</a>`
+                            return `<a href="https://www.nytimes.com/interactive/2020/us/${d.value.toLowerCase().replace(" ", "-")}-coronavirus-cases.html">${states_to_codes[d.value]}</a>`
+                        }
+                        if (d.key == "Deaths") return d.value
+                        return `${d.value.toFixed(1)} d`
+                    })
+        }
+    </script>
+</div>
