@@ -38,7 +38,7 @@ data_label_x = 0.38
 ylims = (0.0, None)
 
 # line formatting
-sns_cols = [(0, 0, 0)] + sns.color_palette('deep')
+sns_cols = [(0, 0, 0)] + sns.color_palette('deep') + sns.color_palette('dark')
 data_linewidth = 4 * size_scale
 data_line_color = 'darkslateblue'
 
@@ -75,7 +75,7 @@ def choose_y(pos, priors, ax, min_dist=min_dist, inc=0.01):
     priors = np.array(priors)
     
     # run through a range of positions and compute the closest label at each one
-    possible = np.arange(0, 1, inc) # span entire axes coordinates
+    possible = np.arange(-0.2, 1.2, inc) # span entire axes coordinates
     mins = []
     for poss in possible:
         poss = axes_to_data.transform((0, poss))[1] # convert temporarily to data coordinates
@@ -88,6 +88,9 @@ def choose_y(pos, priors, ax, min_dist=min_dist, inc=0.01):
     contenders = possible[meets_dist_critera]
     # back to data coords to find option that is closest to originally desired value
     contenders = np.array([axes_to_data.transform((0, i))[1] for i in contenders])
+    # confirm that labels will be in order of data points
+    is_below_priors = contenders < np.min(priors)
+    contenders = contenders[is_below_priors]
     best = np.argmin(np.abs(contenders - pos))
     pos = contenders[best]
     
@@ -156,8 +159,13 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     for col_idx, (column, color) in enumerate(zip(columns, colors)):
         # specify data
         ydata = data[column].values
-        last_ys.append(ydata[-1]) # for labels later on
+        ydata[np.isinf(ydata)] = np.nan
         ydata[ydata > 20] = np.nan
+        if np.all(np.isnan(ydata)):
+            last_ys.append(-1)
+            continue
+
+        last_ys.append(ydata[~np.isnan(ydata)][-1]) # for labels later on
         ydata[np.isinf(ydata)] = np.nan
         xdata = np.arange(len(ydata))
 
@@ -227,9 +235,9 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     ax.tick_params(axis='y', labelsize=ytkfs * simp_fs_mult if simplified else ytkfs)
 
     # labels for data lines
-    #descending = np.argsort(last_ys[1:])[::-1] + 1
-    #order = np.append(0, descending)
+    last_ys = np.array(last_ys)
     order = np.argsort(last_ys)[::-1]
+    order = np.array([o for o in order if last_ys[o]!=-1])
     is_bold = np.zeros(len(columns))
     is_bold[bolds] = 1
     columns_reordered = np.array(columns)[order]
