@@ -87,11 +87,20 @@ def scrape_regional_data(region="new jersey",
 
         # collect values of relevant variable (e.g. deaths)
         values = rows[var_to_track].values
+        print(datestr, '\n', values, '\n\n')
         total = np.nansum(values)
 
         # store values
         dates[day] = np.datetime64(date)
         totals[day] = total
+
+    # correct for any errors where day n+1 has less than day n
+    if np.any(np.diff(totals) < 0):
+        dif = np.append(0, np.diff(totals))
+        i_issue = np.argwhere(dif < 0)[:,0]
+        for i in i_issue:
+            totals[i] = totals[i-1]
+    assert np.all(np.diff(totals) >= 0), 'Non monotonic cumulative values'
 
     result = pd.Series(totals, index=dates)
     return result
