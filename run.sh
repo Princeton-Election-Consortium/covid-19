@@ -17,4 +17,3 @@ python3 main.py confirmed
 cp images/* "/web/www/data/covid-19/today"
 cp images/* "/web/www/data/covid-19/$(date +"%d-%m-%Y")"
 cp data/* "/web/www/data/covid-19/"
-~
