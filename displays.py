@@ -14,7 +14,8 @@ import datetime
 # Aesthetic parameters
 fig_size = (18, 11)
 size_scale = fig_size[0] / 18 # do not adjust; ensures that fonts etc remain reasonable if fig_size is changed
-ax_box = [0.25, 0.15, 0.62, 0.8]
+ax_box = [0.24, 0.15, 0.6, 0.8]
+ax_box_simple = [0.08, 0.17, 0.82, 0.75]
 
 # font sizes
 tfs = 25 * size_scale # title font size
@@ -29,9 +30,9 @@ tlen = 10 * size_scale
 
 # label positions
 title_pos = (0.05, 0.94)
-ylab_pos = (-0.24, 0.5)
+ylab_pos = (-0.245, 0.5)
 min_dist = 0.04
-data_label_x = 0.4
+data_label_x = 0.38
 
 # axes limits
 ylims = (0.0, None)
@@ -145,7 +146,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
 
     ax = None
     if simplified:
-        ax = fig.add_axes([0.05, 0.17, 0.87, 0.75])
+        ax = fig.add_axes(ax_box_simple)
     else:
         ax = fig.add_axes(ax_box) 
 
@@ -175,7 +176,8 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     if runaway_zone:
         ref = 3
         ax.axhspan(0, ref, color='lightcoral', alpha=0.2, lw=0)
-        ax.text(.2, .04, 'RUNAWAY SPREAD', fontsize=(lfs-2)*simp_fs_mult if simplified else (lfs-2), color='red', zorder=150, ha='center', va='center', weight='bold', transform=ax.transAxes, alpha=0.8)
+        xpos = 0.25 if simplified else 0.2
+        ax.text(xpos, .04, 'RUNAWAY SPREAD', fontsize=(lfs-2)*simp_fs_mult if simplified else (lfs-2), color='red', zorder=150, ha='center', va='center', weight='bold', transform=ax.transAxes, alpha=0.8)
 
     # axes/spines aesthetics
     ax.spines['top'].set_visible(False)
@@ -195,7 +197,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
     if simplified:
         ax.set_xticklabels(xtl, rotation=70)
     else:
-        ax.set_xticklabels(xtl, rotation=90)
+        ax.set_xticklabels(xtl, rotation=0)
 
     # x limit
     subdata = data[columns].values
