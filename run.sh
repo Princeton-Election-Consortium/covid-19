@@ -3,7 +3,9 @@
 # Pull new data
 cd /web/covid-19
 git pull origin master
-cd /web/covid-19/COVID-19
+cd /web/covid-19/COVID-19 # jhu
+git pull origin master
+cd /web/covid-19/covid-19-data # nytimes
 git pull origin master
 cd /web/covid-19
 

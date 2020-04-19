@@ -16,11 +16,18 @@ ALL_US_REGIONS = {'Pacific': ['Washington', 'Oregon', 'California'],
                   'Mid-Atlantic': ['Virginia', 'West Virginia', 'Maryland', 'Delaware', 'DC'], 
         }
 
-def scrape_regional_data(region="new jersey", 
-                         region_type="state",
-                         var_to_track="Deaths",
-                         start_date=datetime.date(2020, 1, 25),
-                         data_src_template="COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/{datestr}.csv"):
+def scrape_regional_data(*args, **kwargs):
+    source = kwargs.pop('source', 'jhu')
+    if source == 'jhu':
+        return scrape_regional_data_jhu(*args, **kwargs)
+    elif source == 'nyt':
+        return scrape_regional_data_nyt(*args, **kwargs)
+
+def scrape_regional_data_jhu(region="new jersey", 
+                             region_type="state",
+                             var_to_track="Deaths",
+                             start_date=datetime.date(2020, 1, 25),
+                             data_src_template="COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/{datestr}.csv"):
 
     """Scrape data for a given region and store in local csv file
     
@@ -105,16 +112,95 @@ def scrape_regional_data(region="new jersey",
     result = pd.Series(totals, index=dates)
     return result
 
+def scrape_regional_data_nyt(region="new jersey", 
+                             var_to_track="Deaths",
+                             start_date=datetime.date(2020, 1, 25),
+                             data_src="covid-19-data/us-states.csv",
+                             **kwargs):
+
+    """Scrape data for a given region and store in local csv file
+    
+    Parameters
+    ----------
+    region : name of region, e.g. "new jersey"
+    var_to_track : e.g. "Deaths" / "Confirmed" / "Recovered"
+    start_date : datetime date object, e.g. datetime.date(2020, 1, 1)
+
+    Returns
+    -------
+    regional_data : pd Series with index of dates and values of var_to_track
+    """
+    column_rename = {'deaths': 'Deaths',
+                     'cases': 'Confirmed',
+                    }
+
+    if not isinstance(region, list):
+        region = [region]
+
+    region = [r.lower() for r in region]
+
+    end_date = datetime.date.today()
+    time_delta = end_date - start_date
+    n_days = time_delta.days
+
+    # load in nyt data
+    data = pd.read_csv(data_src)
+
+    # grab and calculate totals for given region    
+    dates = np.zeros(n_days, dtype='datetime64[s]')
+    totals = np.zeros(n_days)
+
+    for day in range(n_days):
+        # specify day of interest and relevant data file
+        date = start_date + datetime.timedelta(days=day)
+        datestr = date.strftime('%Y-%m-%d')
+
+        # clean up
+        data.rename(column_rename, axis=1, inplace=True)
+
+        # collect only rows from region of interest
+        is_region = data['state'].str.lower().isin(region)
+        is_date = data['date'] == datestr
+        rows = data[is_region & is_date]
+
+        # collect values of relevant variable (e.g. deaths)
+        if len(rows) == 0:
+            total = 0
+        else:
+            values = rows[var_to_track].values
+            total = np.nansum(values)
+
+        # store values
+        dates[day] = np.datetime64(date)
+        totals[day] = total
+
+    # correct for any errors where day n+1 has less than day n
+    dif = np.append(0, np.diff(totals))
+    while np.any(dif < 0):
+        i_issue = np.argwhere(dif < 0)[:,0]
+        for i in i_issue:
+            totals[i] = totals[i-1]
+        dif = np.append(0, np.diff(totals))
+    assert np.all(np.diff(totals) >= 0), 'Non monotonic cumulative values'
+
+    result = pd.Series(totals, index=dates)
+    return result
+
 def scrape_all_regions(**kw):
     """Run scrape_regional_data on all states and return merged DataFrame
     """
+    kw['source'] = kw.pop('source', 'jhu')
+
     series_states = {state:scrape_regional_data(state, **kw) for state in ALL_STATES}
     data_states = pd.DataFrame(series_states)
-
-    series_countries = {cou:scrape_regional_data(cou, region_type='country', **kw) for cou in ALL_COUNTRIES}
-    data_countries = pd.DataFrame(series_countries)
     
     series_us_regions = {usr:scrape_regional_data(usr_contents, **kw) for usr,usr_contents in ALL_US_REGIONS.items()}
     data_us_regions = pd.DataFrame(series_us_regions)
-
+    
+    if kw['source'] == 'nyt':
+        print('Using JHU for country data.')
+        kw['source'] = 'jhu' # source for country data must be JHU
+    series_countries = {cou:scrape_regional_data(cou, region_type='country', **kw) for cou in ALL_COUNTRIES}
+    data_countries = pd.DataFrame(series_countries)
+    
     return pd.concat([data_states, data_countries, data_us_regions], axis=1)
