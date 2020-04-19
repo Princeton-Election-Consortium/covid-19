@@ -32,7 +32,7 @@ calculated_filename = f'data/{calculation_kind}-{var_to_track}.csv'
 runaway_zone = calculation_kind == 'doubling_time'
 log = calculation_kind == 'fold_change'
 output_reverse_csv = True
-data_source = 'jhu' # jhu / nyt  (will default to jhu for country data)
+data_source = 'jhu' if 'jhu' in args else 'nyt' # jhu / nyt  (will default to jhu for country data)
 
 ## Step 1: scrape and save to file
 data = scrape_all_regions(var_to_track=var_to_track, source=data_source)
