@@ -3,11 +3,7 @@
 # Pull new data
 cd /web/covid-19
 git pull origin master
-cd /web/covid-19/COVID-19 # jhu
-git pull origin master
-cd /web/covid-19/covid-19-data # nytimes
-git pull origin master
-cd /web/covid-19
+git submodule foreach git pull origin master
 
 [ ! -d "/web/www/data/covid-19/$(date +"%d-%m-%Y")" ] && mkdir "/web/www/data/covid-19/$(date +"%d-%m-%Y")"
 
