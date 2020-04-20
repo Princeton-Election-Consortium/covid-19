@@ -113,6 +113,7 @@ def scrape_regional_data_jhu(region="new jersey",
     return result
 
 def scrape_regional_data_nyt(region="new jersey", 
+                             region_type="state",
                              var_to_track="Deaths",
                              start_date=datetime.date(2020, 1, 25),
                              data_src="covid-19-data/us-states.csv",
@@ -123,6 +124,7 @@ def scrape_regional_data_nyt(region="new jersey",
     Parameters
     ----------
     region : name of region, e.g. "new jersey"
+    region_type : "state" or "country"
     var_to_track : e.g. "Deaths" / "Confirmed" / "Recovered"
     start_date : datetime date object, e.g. datetime.date(2020, 1, 1)
 
@@ -159,7 +161,10 @@ def scrape_regional_data_nyt(region="new jersey",
         data.rename(column_rename, axis=1, inplace=True)
 
         # collect only rows from region of interest
-        is_region = data['state'].str.lower().isin(region)
+        is_region = True
+        if region_type == 'state':
+            is_region = data['state'].str.lower().isin(region)
+
         is_date = data['date'] == datestr
         rows = data[is_region & is_date]
 
@@ -196,11 +201,17 @@ def scrape_all_regions(**kw):
     
     series_us_regions = {usr:scrape_regional_data(usr_contents, **kw) for usr,usr_contents in ALL_US_REGIONS.items()}
     data_us_regions = pd.DataFrame(series_us_regions)
-    
+
+    series_countries = dict()
     if kw['source'] == 'nyt':
-        print('Using JHU for country data.')
-        kw['source'] = 'jhu' # source for country data must be JHU
-    series_countries = {cou:scrape_regional_data(cou, region_type='country', **kw) for cou in ALL_COUNTRIES}
+        print('Using JHU for country data except for US.')
+        kw['source'] = 'jhu' # source for country (except US) data must be JHU
+        series_countries = {cou:scrape_regional_data(cou, region_type='country', **kw) for cou in ALL_COUNTRIES if cou != 'US'}
+        kw['source'] = 'nyt' # source for US data must be NYT
+        series_countries['US'] = scrape_regional_data_nyt('US', region_type='country', data_src='covid-19-data/us.csv', **kw)
+    else:
+        series_countries = {cou:scrape_regional_data(cou, region_type='country', **kw) for cou in ALL_COUNTRIES}
+
     data_countries = pd.DataFrame(series_countries)
     
     return pd.concat([data_states, data_countries, data_us_regions], axis=1)
