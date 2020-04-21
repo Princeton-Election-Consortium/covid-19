@@ -12,6 +12,11 @@ import datetime
 # In general, numeric values can be adjusted here as desired, unless comments specify otherwise
 
 # Aesthetic parameters
+
+# data ranges
+clip_value = 40
+
+# figure layout
 fig_size = (18, 11)
 size_scale = fig_size[0] / 18 # do not adjust; ensures that fonts etc remain reasonable if fig_size is changed
 ax_box = [0.24, 0.15, 0.6, 0.8]
@@ -160,7 +165,7 @@ def generate_plot(filename, columns, title='', ylabel='', log=False, bolds=[], m
         # specify data
         ydata = data[column].values
         ydata[np.isinf(ydata)] = np.nan
-        ydata[ydata > 20] = np.nan
+        ydata[ydata > clip_value] = np.nan
         if np.all(np.isnan(ydata)):
             last_ys.append(-1)
             continue
