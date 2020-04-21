@@ -4,8 +4,8 @@ Python version: 3x
 Dependencies: numpy, pandas, matplotlib, seaborn
 
 Cloning instructions:
-* ``git clone --recurse-submodules https://github.com/Princeton-Election-Consortium/covid-19.git''
-* ensure that ``python3'' points to a python 3x executable on your machine
+* `git clone --recurse-submodules https://github.com/Princeton-Election-Consortium/covid-19.git`
+* ensure that `python3` points to a python 3x executable on your machine
 
 Overall workflow:
 * cron job runs run.sh daily
