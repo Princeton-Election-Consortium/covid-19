@@ -135,6 +135,9 @@ def scrape_regional_data_nyt(region="new jersey",
     column_rename = {'deaths': 'Deaths',
                      'cases': 'Confirmed',
                     }
+    value_relabel = {
+                     'District of Columbia': 'DC',
+                     }
 
     if not isinstance(region, list):
         region = [region]
@@ -159,6 +162,7 @@ def scrape_regional_data_nyt(region="new jersey",
 
         # clean up
         data.rename(column_rename, axis=1, inplace=True)
+        data.replace(value_relabel, inplace=True)
 
         # collect only rows from region of interest
         is_region = True
