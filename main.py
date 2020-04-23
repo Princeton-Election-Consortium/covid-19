@@ -11,7 +11,7 @@ It is run using the run.sh bash script which first pulls down new data.
 
 import os, sys
 import pandas as pd
-from scrape import scrape_all_regions, ALL_US_REGIONS
+from scrape import scrape_all_regions, ALL_US_REGIONS, scrape_all_counties
 from calculations import calculate, compute_top_n, c_str
 from displays import generate_plot, generate_html
 
@@ -28,10 +28,13 @@ else:
 calculation_kind = 'doubling_time' # doubling_time / fold_change
 show_n_days = 25
 scraped_data_filename = f'data/scraped_data-{var_to_track}.csv'
+scraped_data_usc_filename = f'data/scraped_data_us_counties-{var_to_track}.csv'
 calculated_filename = f'data/{calculation_kind}-{var_to_track}.csv'
+calculated_usc_filename = f'data/{calculation_kind}_us_counties-{var_to_track}.csv'
 runaway_zone = calculation_kind == 'doubling_time'
 log = calculation_kind == 'fold_change'
 output_reverse_csv = True
+analyze_us_counties = False # may take a few mins
 data_source = 'jhu' if 'jhu' in args else 'nyt' # jhu / nyt  (will default to jhu for country data)
 
 ## Step 1: scrape and save to file
@@ -160,5 +163,10 @@ path_3 = generate_plot(calculated_filename,
                        simplified=True,
                        simp_fs_mult=1.3)
 
-## Step 4: generate html (as example)
-generate_html([path_1, path_2, path_3])
+
+## Step 4: analyze US counties (optional)
+if analyze_us_counties:
+    data = scrape_all_counties()
+    data.to_csv(scraped_data_usc_filename)
+    calculated = calculate(calculation_kind, scraped_data_usc_filename)
+    calculated.to_csv(calculated_usc_filename)

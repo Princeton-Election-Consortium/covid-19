@@ -14,7 +14,7 @@ import datetime
 # Aesthetic parameters
 
 # data ranges
-clip_value = 40
+clip_value = 35
 
 # figure layout
 fig_size = (18, 11)
@@ -80,7 +80,7 @@ def choose_y(pos, priors, ax, min_dist=min_dist, inc=0.01):
     priors = np.array(priors)
     
     # run through a range of positions and compute the closest label at each one
-    possible = np.arange(-0.2, 1.2, inc) # span entire axes coordinates
+    possible = np.arange(-0.4, 1.4, inc) # span entire axes coordinates
     mins = []
     for poss in possible:
         poss = axes_to_data.transform((0, poss))[1] # convert temporarily to data coordinates
